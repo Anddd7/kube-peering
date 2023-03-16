@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if [[ $(git remote -v | grep github.com) ]]; then
+  echo "Commit Rules NOT enforced"
+  exit 0
+else
+  echo "Commit Rules enforced"
+fi
+
+MSG_FILE=$1
+FILE_CONTENT="$(cat $MSG_FILE)"
+
+# Initialize constants here
+export REGEX='^(feat:|test:|fix:|refactor:|infra:|docs:|rfcs:|arch:|Merge) .+'
+export ERROR_MSG="Commit message should start with \"${REGEX}\""
+
+if [[ $FILE_CONTENT =~ $REGEX ]]; then
+	echo "Good commit!"
+else
+  	echo "Bad commit \"$FILE_CONTENT\""
+	echo $ERROR_MSG
+	exit 1
+fi
+
+exit 0
