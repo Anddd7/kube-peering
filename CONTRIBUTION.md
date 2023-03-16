@@ -17,3 +17,7 @@ Documentation
 - docs:
 - rfcs:
 - arch: architecture design
+
+## Version
+
+Refer to [Semantic Versioning 2.0.0](https://semver.org/)
