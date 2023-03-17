@@ -5,7 +5,7 @@ ROOT_PATH 		= $(shell git rev-parse --show-toplevel 2>/dev/null)
 BUILD_BINARY 	= $(ROOT_PATH)/bin/$(COMMAND)
 
 run:
-	go run ./
+	go run . $(args)
 
 build:
 	go build -o $(BUILD_BINARY) ./
