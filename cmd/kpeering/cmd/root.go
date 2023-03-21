@@ -6,8 +6,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/kube-peering/internal/config"
-	"github.com/kube-peering/internal/logger"
+	"github.com/kube-peering/internal/pkg/config"
+	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

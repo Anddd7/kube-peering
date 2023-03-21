@@ -6,8 +6,8 @@ import (
 	"net"
 	"os"
 
-	"github.com/kube-peering/internal/logger"
-	"github.com/kube-peering/internal/model"
+	"github.com/kube-peering/internal/pkg/logger"
+	"github.com/kube-peering/internal/pkg/model"
 )
 
 func main() {

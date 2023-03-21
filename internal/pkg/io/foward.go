@@ -3,7 +3,7 @@ package io
 import (
 	"net"
 
-	"github.com/kube-peering/internal/logger"
+	"github.com/kube-peering/internal/pkg/logger"
 )
 
 func BiFoward(fromName string, from net.Conn, toName string, to net.Conn) {
