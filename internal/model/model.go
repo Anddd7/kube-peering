@@ -1,7 +1,9 @@
 package model
 
-var DefaultFrontdoor = CreateFrontdoor("localhost", 10021)
-var DefaultBackdoor = CreateBackdoor("localhost", 10022)
+var (
+	DefaultFrontdoor = CreateFrontdoor("localhost", 10021)
+	DefaultBackdoor  = CreateBackdoor("localhost", 10022)
+)
 
 type Frontdoor struct {
 	Endpoint
