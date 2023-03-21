@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"bufio"
-	"fmt"
 	"net"
-	"os"
 
+	"github.com/kube-peering/internal/config"
 	"github.com/kube-peering/internal/logger"
 	"github.com/spf13/cobra"
 )
@@ -22,76 +20,88 @@ func init() {
 	rootCmd.AddCommand(startCmd)
 }
 
-type client chan<- string // 对于其他客户端的输出通道
+func forward(from net.Conn, to net.Conn) {
+	defer from.Close()
+	defer to.Close()
 
-var (
-	entering = make(chan client)
-	leaving  = make(chan client)
-	messages = make(chan string) // 所有接收到的客户端消息
-)
-
-func broadcaster() {
-	clients := make(map[client]bool) // 所有连接的客户端
+	ch1 := make(chan []byte)
+	ch2 := make(chan []byte)
+	// read data and put into channel
+	go func() {
+		buf := make([]byte, 1024)
+		for {
+			n, err := from.Read(buf)
+			if err != nil {
+				logger.Z.Error(err)
+				break
+			}
+			logger.Z.Infoln("Recive msg from client side")
+			ch1 <- buf[:n]
+		}
+	}()
+	go func() {
+		buf := make([]byte, 1024)
+		for {
+			n, err := to.Read(buf)
+			if err != nil {
+				logger.Z.Error(err)
+				break
+			}
+			logger.Z.Infoln("Recive msg from server side")
+			ch2 <- buf[:n]
+		}
+	}()
 
 	for {
 		select {
-		case msg := <-messages:
-			// 将消息广播到所有客户端
-			for cli := range clients {
-				cli <- msg
+		case buf := <-ch1:
+			_, err := to.Write(buf)
+			logger.Z.Infoln("Write msg to backdoor side")
+			if err != nil {
+				logger.Z.Error(err)
+				break
 			}
-		case cli := <-entering:
-			// 新客户端连接
-			clients[cli] = true
-		case cli := <-leaving:
-			// 客户端断开连接
-			delete(clients, cli)
-			close(cli)
+		case buf := <-ch2:
+			_, err := from.Write(buf)
+			logger.Z.Infoln("Write msg to foward side")
+			if err != nil {
+				logger.Z.Error(err)
+				break
+			}
 		}
-	}
-}
-
-func handleConn(conn net.Conn) {
-	ch := make(chan string) // 发送给客户端的消息通道
-	go clientWriter(conn, ch)
-
-	who := conn.RemoteAddr().String()
-	ch <- "You are " + who
-	messages <- who + " has arrived"
-	entering <- ch
-
-	input := bufio.NewScanner(conn)
-	for input.Scan() {
-		messages <- who + ": " + input.Text()
-	}
-
-	leaving <- ch
-	messages <- who + " has left"
-	conn.Close()
-}
-
-func clientWriter(conn net.Conn, ch <-chan string) {
-	for msg := range ch {
-		fmt.Fprintln(conn, msg) // 发送给客户端
 	}
 }
 
 func start() {
-	listener, err := net.Listen("tcp", "localhost:8000")
+	forwardListener, err := net.Listen("tcp", config.KpeeringForwardAddr)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to listen: %v\n", err)
-		os.Exit(1)
+		logger.Z.Error(err)
+		return
 	}
+	defer forwardListener.Close()
 
-	go broadcaster()
+	backdoorListener, err := net.Listen("tcp", config.KpeeringBackdoorAddr)
+	if err != nil {
+		logger.Z.Error(err)
+		return
+	}
+	defer backdoorListener.Close()
 
 	for {
-		conn, err := listener.Accept()
+		backdoorConn, err := backdoorListener.Accept()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to accept incoming connection: %v\n", err)
+			logger.Z.Error(err)
 			continue
 		}
+		logger.Z.Infoln("backdoor is open")
 
-		go handleConn(conn)
+		forwardConn, err := forwardListener.Accept()
+		if err != nil {
+			logger.Z.Error(err)
+			continue
+		}
+		logger.Z.Infoln("accept forward request")
+
+		go forward(forwardConn, backdoorConn)
 	}
 }
