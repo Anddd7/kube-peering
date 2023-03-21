@@ -46,11 +46,9 @@ func handleConnection(conn net.Conn) {
 		// 4. 给消息加前缀
 		reply := fmt.Sprintf("已读：%s", msg)
 
-		logger.Z.Infof("Get msg from remote: %s", reply)
-
 		// 5. 将加了前缀的消息回复给客户端
 		conn.Write([]byte(reply))
 
-		logger.Z.Infof("write response to remote: %s", msg)
+		logger.Z.Infof("Recived message from client: %s, replied: %s", msg, reply)
 	}
 }

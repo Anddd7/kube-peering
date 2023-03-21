@@ -3,15 +3,28 @@ package cmd
 import (
 	"net"
 
-	"github.com/kube-peering/internal/config"
+	"github.com/kube-peering/internal/io"
 	"github.com/kube-peering/internal/logger"
+	"github.com/kube-peering/internal/model"
 	"github.com/spf13/cobra"
 )
+
+type Kpeering struct {
+	frontdoor model.Frontdoor
+	backdoor  model.Backdoor
+}
+
+var kpeering *Kpeering
 
 var startCmd = &cobra.Command{
 	Use: "start",
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.InitLogger()
+		// TODO create via command args
+		kpeering = &Kpeering{
+			frontdoor: model.DefaultFrontdoor,
+			backdoor:  model.DefaultBackdoor,
+		}
 		start()
 	},
 }
@@ -20,88 +33,37 @@ func init() {
 	rootCmd.AddCommand(startCmd)
 }
 
-func forward(from net.Conn, to net.Conn) {
-	defer from.Close()
-	defer to.Close()
-
-	ch1 := make(chan []byte)
-	ch2 := make(chan []byte)
-	// read data and put into channel
-	go func() {
-		buf := make([]byte, 1024)
-		for {
-			n, err := from.Read(buf)
-			if err != nil {
-				logger.Z.Error(err)
-				break
-			}
-			logger.Z.Infoln("Recive msg from client side")
-			ch1 <- buf[:n]
-		}
-	}()
-	go func() {
-		buf := make([]byte, 1024)
-		for {
-			n, err := to.Read(buf)
-			if err != nil {
-				logger.Z.Error(err)
-				break
-			}
-			logger.Z.Infoln("Recive msg from server side")
-			ch2 <- buf[:n]
-		}
-	}()
-
-	for {
-		select {
-		case buf := <-ch1:
-			_, err := to.Write(buf)
-			logger.Z.Infoln("Write msg to backdoor side")
-			if err != nil {
-				logger.Z.Error(err)
-				break
-			}
-		case buf := <-ch2:
-			_, err := from.Write(buf)
-			logger.Z.Infoln("Write msg to foward side")
-			if err != nil {
-				logger.Z.Error(err)
-				break
-			}
-		}
-	}
-}
-
 func start() {
-	forwardListener, err := net.Listen("tcp", config.KpeeringForwardAddr)
+	frontdoorListener, err := net.Listen("tcp", kpeering.frontdoor.Address())
 	if err != nil {
-		logger.Z.Error(err)
+		logger.Z.Errorf("failed to start frontdoor listener: %v", err)
 		return
 	}
-	defer forwardListener.Close()
+	defer frontdoorListener.Close()
 
-	backdoorListener, err := net.Listen("tcp", config.KpeeringBackdoorAddr)
+	backdoorListener, err := net.Listen("tcp", kpeering.backdoor.Address())
 	if err != nil {
-		logger.Z.Error(err)
+		logger.Z.Errorf("failed to start backdoor listener: %v", err)
 		return
 	}
 	defer backdoorListener.Close()
 
+	// TODO use mutex and wait for both front and back conn ready
 	for {
+		frontdoorConn, err := frontdoorListener.Accept()
+		if err != nil {
+			logger.Z.Error(err)
+			continue
+		}
+		logger.Z.Infoln("frontdoor connection is comming")
+
 		backdoorConn, err := backdoorListener.Accept()
 		if err != nil {
 			logger.Z.Error(err)
 			continue
 		}
-		logger.Z.Infoln("backdoor is open")
+		logger.Z.Infoln("backdoor is opened")
 
-		forwardConn, err := forwardListener.Accept()
-		if err != nil {
-			logger.Z.Error(err)
-			continue
-		}
-		logger.Z.Infoln("accept forward request")
-
-		go forward(forwardConn, backdoorConn)
+		go io.BiFoward("Frontdoor", frontdoorConn, "Backdoor", backdoorConn)
 	}
 }
