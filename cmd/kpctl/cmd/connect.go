@@ -7,18 +7,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var connectCmd = &cobra.Command{
-	Use: "connect",
-	Run: func(cmd *cobra.Command, args []string) {
-		logger.InitLogger()
-		// TODO create via command args
-		kpctl := &kpctl.Kpctl{
-			Backdoor:    model.DefaultBackdoor,
-			Application: model.CreateApplication("localhost", 8080),
-		}
-		kpctl.Connect()
-	},
-}
+var (
+	instance   *kpctl.Kpctl
+	connectCmd = &cobra.Command{
+		Use: "connect",
+		PreRun: func(cmd *cobra.Command, args []string) {
+			logger.InitLogger()
+			instance = &kpctl.Kpctl{
+				Backdoor:    model.DefaultBackdoor,
+				Application: model.CreateApplication("localhost", 8080),
+			}
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			instance.Connect()
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(connectCmd)

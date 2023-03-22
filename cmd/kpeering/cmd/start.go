@@ -7,16 +7,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var instance *kpeering.Kpeering
+
 var startCmd = &cobra.Command{
 	Use: "start",
-	Run: func(cmd *cobra.Command, args []string) {
+	PreRun: func(cmd *cobra.Command, args []string) {
 		logger.InitLogger()
-		// TODO create via command args
-		kpeering := &kpeering.Kpeering{
+		instance = &kpeering.Kpeering{
 			Frontdoor: model.DefaultFrontdoor,
 			Backdoor:  model.DefaultBackdoor,
 		}
-		kpeering.Start()
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		instance.Start()
 	},
 }
 
