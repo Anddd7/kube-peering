@@ -1,9 +1,6 @@
 package model
 
-var (
-	DefaultFrontdoor = CreateFrontdoor("localhost", 10021)
-	DefaultBackdoor  = CreateBackdoor("localhost", 10022)
-)
+var DefaultBackdoor = CreateBackdoor("localhost", 10022)
 
 type Frontdoor struct {
 	Endpoint
@@ -17,9 +14,11 @@ type Application struct {
 	Endpoint
 }
 
-func CreateFrontdoor(host string, port int) Frontdoor {
+func CreateFrontdoor(protocol, host string, port int) Frontdoor {
 	return Frontdoor{
 		Endpoint: Endpoint{
+			Name:       "frontdoor",
+			Protocol:   protocol,
 			Host:       host,
 			ListenPort: port,
 		},
@@ -29,6 +28,8 @@ func CreateFrontdoor(host string, port int) Frontdoor {
 func CreateBackdoor(host string, port int) Backdoor {
 	return Backdoor{
 		Endpoint: Endpoint{
+			Name:       "backdoor",
+			Protocol:   "tcp",
 			Host:       host,
 			ListenPort: port,
 		},

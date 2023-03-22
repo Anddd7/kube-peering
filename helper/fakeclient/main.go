@@ -6,14 +6,14 @@ import (
 	"net"
 	"os"
 
+	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
-	"github.com/kube-peering/internal/pkg/model"
 )
 
 func main() {
 	logger.InitSimpleLogger()
 
-	conn, err := net.Dial("tcp", model.DefaultFrontdoor.Address())
+	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", config.DefautlFrontdoorPort))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to connect to server: %v\n", err)
 		os.Exit(1)

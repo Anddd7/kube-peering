@@ -15,7 +15,7 @@ var startCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		logger.InitLogger(config.DebugMode, config.LogEncoder)
 		instance = &kpeering.Kpeering{
-			Frontdoor: model.DefaultFrontdoor,
+			Frontdoor: model.CreateFrontdoor(flags.protocol, flags.host, flags.port),
 			Backdoor:  model.DefaultBackdoor,
 		}
 	},
@@ -24,6 +24,15 @@ var startCmd = &cobra.Command{
 	},
 }
 
+var flags = struct {
+	protocol string
+	host     string
+	port     int
+}{}
+
 func init() {
 	rootCmd.AddCommand(startCmd)
+	startCmd.Flags().StringVar(&flags.protocol, "protocol", "tcp", "the target protocol")
+	startCmd.Flags().StringVar(&flags.host, "host", "localhost", "the target host")
+	startCmd.Flags().IntVarP(&flags.port, "port", "p", config.DefautlFrontdoorPort, "the target port")
 }

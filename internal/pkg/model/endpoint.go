@@ -5,6 +5,8 @@ import (
 )
 
 type Endpoint struct {
+	Name       string
+	Protocol   string
 	Host       string
 	ListenPort int
 }
