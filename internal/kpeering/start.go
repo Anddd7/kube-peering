@@ -4,7 +4,6 @@ import (
 	"net"
 
 	"github.com/kube-peering/internal/pkg/io"
-	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/model"
 )
 
@@ -14,36 +13,20 @@ type Kpeering struct {
 }
 
 func (peering *Kpeering) Start() {
-	frontdoorListener, err := net.Listen("tcp", peering.Frontdoor.Address())
-	if err != nil {
-		logger.Z.Errorf("failed to start frontdoor listener: %v", err)
-		return
-	}
-	defer frontdoorListener.Close()
+	frontdoorConnChan := make(chan net.Conn)
+	backdoorConnChan := make(chan net.Conn)
 
-	backdoorListener, err := net.Listen("tcp", peering.Backdoor.Address())
-	if err != nil {
-		logger.Z.Errorf("failed to start backdoor listener: %v", err)
-		return
-	}
-	defer backdoorListener.Close()
+	go io.AcceptConnections("frontdoor", "tcp", peering.Frontdoor.Address(), frontdoorConnChan)
+	go io.AcceptConnections("backdoor", "tcp", peering.Backdoor.Address(), backdoorConnChan)
 
-	// TODO use mutex and wait for both front and back conn ready
 	for {
-		frontdoorConn, err := frontdoorListener.Accept()
-		if err != nil {
-			logger.Z.Error(err)
-			continue
+		select {
+		case f := <-frontdoorConnChan:
+			b := <-backdoorConnChan
+			go io.BiFoward("frontdoor", f, "backdoor", b)
+		case b := <-backdoorConnChan:
+			f := <-frontdoorConnChan
+			go io.BiFoward("frontdoor", f, "backdoor", b)
 		}
-		logger.Z.Infoln("frontdoor connection is comming")
-
-		backdoorConn, err := backdoorListener.Accept()
-		if err != nil {
-			logger.Z.Error(err)
-			continue
-		}
-		logger.Z.Infoln("backdoor is opened")
-
-		go io.BiFoward("Frontdoor", frontdoorConn, "Backdoor", backdoorConn)
 	}
 }
