@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	logger.InitLogger()
+	logger.InitSimpleLogger()
 
 	// 1. 监听8080端口
 	ln, err := net.Listen("tcp", ":8080")

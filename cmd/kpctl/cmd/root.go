@@ -6,6 +6,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/kube-peering/internal/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -22,4 +23,6 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Flags().BoolVar(&config.DebugMode, "debug", config.DebugMode, "Enable debug logs")
+	rootCmd.Flags().StringVar(&config.LogEncoder, "log-encoder", config.LogEncoder, "Log format, json or plain")
 }

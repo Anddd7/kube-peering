@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	logger.InitLogger()
+	logger.InitSimpleLogger()
 
 	conn, err := net.Dial("tcp", model.DefaultFrontdoor.Address())
 	if err != nil {

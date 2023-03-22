@@ -1,3 +1,6 @@
 package config
 
-var DevMode bool = false
+var (
+	DebugMode  bool   = false
+	LogEncoder string = "plain"
+)

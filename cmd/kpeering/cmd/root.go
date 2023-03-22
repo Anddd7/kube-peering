@@ -27,5 +27,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVar(&config.DevMode, "dev", config.DevMode, "Enable developer mode")
+	rootCmd.Flags().BoolVar(&config.DebugMode, "debug", config.DebugMode, "Enable debug logs")
+	rootCmd.Flags().StringVar(&config.LogEncoder, "log-encoder", config.LogEncoder, "Log format, json or plain")
 }
