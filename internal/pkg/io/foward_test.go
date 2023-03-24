@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kube-peering/internal/pkg/logger"
+	util_test "github.com/kube-peering/internal/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,8 +34,8 @@ func TestBiForward(t *testing.T) {
 		target, _ := net.Dial("tcp", address)
 		defer target.Close()
 
-		assertWrite(t, source, message)
-		assertRead(t, target, message)
+		util_test.AssertWrite(t, source, message)
+		util_test.AssertRead(t, target, message)
 	})
 
 	t.Run("should return error if source disconnected", func(t *testing.T) {

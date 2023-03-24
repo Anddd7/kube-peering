@@ -5,14 +5,14 @@ import (
 
 	"github.com/kube-peering/internal/kpctl"
 	"github.com/kube-peering/internal/pkg/model"
-	"github.com/kube-peering/internal/pkg/util"
+	util_test "github.com/kube-peering/internal/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConnectCommand(t *testing.T) {
-	connectCmd.Run = util.MockRun
+	connectCmd.Run = util_test.MockRun
 
-	c, out, err := util.ExecuteCommandC(rootCmd, []string{"connect"}...)
+	c, out, err := util_test.ExecuteCommandC(rootCmd, []string{"connect"}...)
 
 	assert.Equal(t, "connect", c.Name())
 	assert.Empty(t, out)

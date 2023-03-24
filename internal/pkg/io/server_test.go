@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kube-peering/internal/pkg/logger"
+	util_test "github.com/kube-peering/internal/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,8 +26,8 @@ func TestStartTCPServer(t *testing.T) {
 			wg.Done()
 		},
 		func(conn net.Conn) {
-			assertRead(t, conn, request)
-			assertWrite(t, conn, response)
+			util_test.AssertRead(t, conn, request)
+			util_test.AssertWrite(t, conn, response)
 		},
 	)
 
@@ -38,25 +39,6 @@ func TestStartTCPServer(t *testing.T) {
 	}
 	defer conn.Close()
 
-	assertWrite(t, conn, request)
-	assertRead(t, conn, response)
-}
-
-func assertWrite(t *testing.T, conn net.Conn, data string) {
-	_, err := conn.Write([]byte(data))
-	if err != nil {
-		t.Errorf("write failed: %v", err)
-	}
-}
-
-func assertRead(t *testing.T, conn net.Conn, expected string) {
-	buffer := make([]byte, len(expected))
-	_, err := conn.Read(buffer)
-	if err != nil {
-		t.Errorf("read failed: %v", err)
-	}
-
-	if string(buffer) != expected {
-		t.Errorf("received wrong response: expected %s actual %s", expected, string(buffer))
-	}
+	util_test.AssertWrite(t, conn, request)
+	util_test.AssertRead(t, conn, response)
 }
