@@ -7,7 +7,7 @@ func TestLogger(t *testing.T) {
 		t.Errorf(`Z should be nil`)
 	}
 
-	InitSimpleLogger()
+	InitLogger(true, "json")
 
 	if Z == nil {
 		t.Errorf(`Z should not be nil`)

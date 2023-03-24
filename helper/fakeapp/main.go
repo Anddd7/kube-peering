@@ -10,8 +10,6 @@ import (
 )
 
 func main() {
-	logger.InitSimpleLogger()
-
 	io.StartTCPServer(":8080", func(s string) {}, handleConnection)
 }
 

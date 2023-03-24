@@ -5,14 +5,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/kube-peering/internal/pkg/logger"
 	util_test "github.com/kube-peering/internal/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestStartTCPServer(t *testing.T) {
-	logger.InitSimpleLogger()
-
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 

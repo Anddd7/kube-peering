@@ -7,12 +7,9 @@ import (
 	"os"
 
 	"github.com/kube-peering/internal/pkg/config"
-	"github.com/kube-peering/internal/pkg/logger"
 )
 
 func main() {
-	logger.InitSimpleLogger()
-
 	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", config.DefautlFrontdoorPort))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to connect to server: %v\n", err)

@@ -10,7 +10,8 @@ import (
 
 var Z *zap.SugaredLogger
 
-func InitSimpleLogger() {
+// by default, it will init simple logger
+func init() {
 	InitLogger(true, "plain")
 }
 
