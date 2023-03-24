@@ -20,12 +20,20 @@ func (ctl *Kpctl) Connect() {
 		logger.Z.Errorf("failed to connect backdoor of peering server: %v", err)
 		os.Exit(1)
 	}
+	defer backdoorConn.Close()
 
 	applicationConn, err := net.Dial("tcp", ctl.Application.Address())
 	if err != nil {
 		logger.Z.Errorf("failed to connect target application: %v", err)
 		os.Exit(1)
 	}
+	defer applicationConn.Close()
 
-	io.BiFoward("Backdoor", backdoorConn, "Application", applicationConn)
+	err = io.BiFoward(backdoorConn, applicationConn)
+	switch err {
+	case io.ErrSourceDisconnected:
+		logger.Z.Errorf("the connection to backdoor of peering server is closed")
+	case io.ErrTargetDisconnected:
+		logger.Z.Errorf("the connection to target application is closed")
+	}
 }

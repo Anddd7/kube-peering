@@ -1,59 +1,82 @@
 package io
 
 import (
+	"context"
+	"errors"
 	"net"
 
 	"github.com/kube-peering/internal/pkg/logger"
 )
 
-func BiFoward(fromName string, from net.Conn, toName string, to net.Conn) {
-	defer from.Close()
-	defer to.Close()
+var (
+	ErrSourceDisconnected = errors.New("source disconnected")
+	ErrTargetDisconnected = errors.New("target disconnected")
+)
 
-	request := make(chan []byte)
-	response := make(chan []byte)
-	bufferSize := 1024
+const bufferSize = 1024
+
+func BiFoward(from net.Conn, to net.Conn) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	errChan := make(chan error)
 
 	go func() {
+		defer cancel()
+
 		for {
-			buf := make([]byte, bufferSize)
-			n, err := from.Read(buf)
-			if err != nil {
-				logger.Z.Errorf("=> Got an error %v", err)
-				break
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				buf := make([]byte, bufferSize)
+				_, err := from.Read(buf)
+				if err != nil {
+					logger.Z.Errorf("=> Got an error %v", err)
+					errChan <- ErrSourceDisconnected
+					return
+				}
+
+				logger.Z.Infof("=> Recive request and forward to target")
+
+				_, err = to.Write(buf)
+				if err != nil {
+					logger.Z.Errorf("=> Got an error %v", err)
+					errChan <- ErrTargetDisconnected
+					return
+				}
 			}
-			logger.Z.Infof("=> Recive request data from %s", fromName)
-			request <- buf[:n]
 		}
 	}()
 
 	go func() {
+		defer cancel()
+
 		for {
-			buf := make([]byte, bufferSize)
-			n, err := to.Read(buf)
-			if err != nil {
-				logger.Z.Errorf("<= Got an error %v", err)
-				break
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				buf := make([]byte, bufferSize)
+				_, err := to.Read(buf)
+				if err != nil {
+					logger.Z.Errorf("<= Got an error %v", err)
+					errChan <- ErrTargetDisconnected
+					return
+				}
+				logger.Z.Infof("<= Recive response and forward back to source")
+
+				_, err = from.Write(buf)
+				if err != nil {
+					logger.Z.Errorf("<= Got an error %v", err)
+					errChan <- ErrSourceDisconnected
+					return
+				}
 			}
-			logger.Z.Infof("<= Recive response data from %s", toName)
-			response <- buf[:n]
 		}
 	}()
 
-	for {
-		select {
-		case buf := <-request:
-			_, err := to.Write(buf)
-			logger.Z.Infof("=> Forward request to %s", toName)
-			if err != nil {
-				logger.Z.Errorf("=> Got an error %v", err)
-			}
-		case buf := <-response:
-			_, err := from.Write(buf)
-			logger.Z.Infof("<= Forward response to %s", fromName)
-			if err != nil {
-				logger.Z.Errorf("<= Got an error %v", err)
-			}
-		}
+	for err := range errChan {
+		return err
 	}
+
+	return nil
 }

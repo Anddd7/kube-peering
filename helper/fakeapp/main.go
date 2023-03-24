@@ -12,13 +12,7 @@ import (
 func main() {
 	logger.InitSimpleLogger()
 
-	connChan := make(chan net.Conn)
-
-	go io.AcceptConnections("test_app", "tcp", ":8080", connChan)
-
-	for conn := range connChan {
-		go handleConnection(conn)
-	}
+	io.StartTCPServer(":8080", func(s string) {}, handleConnection)
 }
 
 func handleConnection(conn net.Conn) {
