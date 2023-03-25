@@ -21,7 +21,6 @@ func StartTCPServer(address string, onReady func(string), onConnected func(net.C
 			logger.Z.Error(err)
 			continue
 		}
-		logger.Z.Infoln("New connection from", conn.RemoteAddr())
 		go onConnected(conn)
 	}
 }

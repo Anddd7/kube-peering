@@ -1,6 +1,7 @@
 package kpctl
 
 import (
+	"context"
 	"net"
 	"os"
 
@@ -13,6 +14,12 @@ type Kpctl struct {
 	Backdoor    model.Backdoor
 	Application model.Application
 }
+
+/*
+req -> backdoorConn -> reqChan -> applicationConn
+- 										|
+res <- backdoorConn <- resChan <- applicationConn
+*/
 
 func (ctl *Kpctl) Connect() {
 	backdoorConn, err := net.Dial("tcp", ctl.Backdoor.Address())
@@ -29,11 +36,33 @@ func (ctl *Kpctl) Connect() {
 	}
 	defer applicationConn.Close()
 
-	err = io.BiFoward(backdoorConn, applicationConn)
-	switch err {
-	case io.ErrSourceDisconnected:
-		logger.Z.Errorf("the connection to backdoor of peering server is closed")
-	case io.ErrTargetDisconnected:
-		logger.Z.Errorf("the connection to target application is closed")
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	reqChan := make(chan []byte)
+	resChan := make(chan []byte)
+
+	go func() {
+		err := io.ReadTo(backdoorConn, reqChan)
+		logger.Z.Errorf("failed to read from backdoor of peering server: %v", err)
+		cancel()
+	}()
+
+	go func() {
+		err := io.WriteTo(reqChan, applicationConn)
+		logger.Z.Errorf("failed to write to target application: %v", err)
+		cancel()
+	}()
+
+	go func() {
+		err := io.ReadTo(applicationConn, resChan)
+		logger.Z.Errorf("failed to read from target application: %v", err)
+		cancel()
+	}()
+
+	go func() {
+		err := io.WriteTo(resChan, backdoorConn)
+		logger.Z.Errorf("failed to write to backdoor of peering server: %v", err)
+		cancel()
+	}()
+
+	<-ctx.Done()
 }
