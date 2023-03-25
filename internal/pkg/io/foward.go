@@ -35,7 +35,8 @@ func BiFoward(from net.Conn, to net.Conn) error {
 					return
 				}
 
-				logger.Z.Infof("=> Recive request and forward to target")
+				logger.Z.Infof("=> Recive request %s => %s", from.RemoteAddr(), from.LocalAddr())
+				logger.Z.Infof("=> Forward to %s => %s", to.LocalAddr(), to.RemoteAddr())
 
 				_, err = to.Write(buf)
 				if err != nil {
@@ -43,6 +44,8 @@ func BiFoward(from net.Conn, to net.Conn) error {
 					errChan <- ErrTargetDisconnected
 					return
 				}
+
+				logger.Z.Infof("=> %s", string(buf))
 			}
 		}
 	}()
@@ -62,7 +65,9 @@ func BiFoward(from net.Conn, to net.Conn) error {
 					errChan <- ErrTargetDisconnected
 					return
 				}
-				logger.Z.Infof("<= Recive response and forward back to source")
+
+				logger.Z.Infof("<= Recive response %s => %s", to.RemoteAddr(), to.LocalAddr())
+				logger.Z.Infof("<= Forward to %s => %s", from.LocalAddr(), from.RemoteAddr())
 
 				_, err = from.Write(buf)
 				if err != nil {
@@ -70,6 +75,8 @@ func BiFoward(from net.Conn, to net.Conn) error {
 					errChan <- ErrSourceDisconnected
 					return
 				}
+
+				logger.Z.Infof("<= %s", string(buf))
 			}
 		}
 	}()

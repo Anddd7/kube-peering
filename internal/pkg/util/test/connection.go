@@ -6,6 +6,7 @@ import (
 )
 
 func AssertWrite(t *testing.T, conn net.Conn, data string) {
+	t.Helper()
 	_, err := conn.Write([]byte(data))
 	if err != nil {
 		t.Errorf("write failed: %v", err)
@@ -13,6 +14,7 @@ func AssertWrite(t *testing.T, conn net.Conn, data string) {
 }
 
 func AssertRead(t *testing.T, conn net.Conn, expected string) {
+	t.Helper()
 	buffer := make([]byte, len(expected))
 	_, err := conn.Read(buffer)
 	if err != nil {
