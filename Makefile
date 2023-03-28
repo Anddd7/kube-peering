@@ -1,3 +1,6 @@
+git_hooks:
+	ln -sf ./hooks/commit-msg .git/hooks/commit-msg
+
 clean:
 	rm -rf bin
 

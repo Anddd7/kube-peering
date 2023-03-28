@@ -11,7 +11,7 @@ MSG_FILE=$1
 FILE_CONTENT="$(cat $MSG_FILE)"
 
 # Initialize constants here
-export REGEX='^(feat:|test:|fix:|refactor:|infra:|docs:|rfcs:|arch:|Merge) .+'
+export REGEX='^(feat:|test:|fix:|docs:|Merge) .+'
 export ERROR_MSG="Commit message should start with \"${REGEX}\""
 
 if [[ $FILE_CONTENT =~ $REGEX ]]; then
