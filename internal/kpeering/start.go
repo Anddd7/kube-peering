@@ -77,7 +77,7 @@ func (cfg *Kpeering) startBackdoorTCPServer(reqChan chan []byte, resChan chan []
 		func(c net.Conn) {
 			mutex.Lock()
 			if conn == nil {
-				logger.Z.Infoln("[backdoor] New connection from", conn.RemoteAddr())
+				logger.Z.Infoln("[backdoor] New connection from", c.RemoteAddr())
 				conn = c
 				wg.Done()
 			} else {
@@ -135,7 +135,7 @@ func (cfg *Kpeering) startFrontdoorTCPServer(reqChan chan []byte, resChan chan [
 		func(c net.Conn) {
 			mutex.Lock()
 			if conn == nil {
-				logger.Z.Infoln("[frontdoor] New connection from", conn.RemoteAddr())
+				logger.Z.Infoln("[frontdoor] New connection from", c.RemoteAddr())
 				conn = c
 				wg.Done()
 			} else {
