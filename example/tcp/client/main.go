@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"net"
 	"os"
-
-	"github.com/kube-peering/internal/pkg/config"
 )
 
 func main() {
-	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", config.DefautlFrontdoorPort))
+	conn, err := net.Dial("tcp", "10021")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to connect to server: %v\n", err)
 		os.Exit(1)

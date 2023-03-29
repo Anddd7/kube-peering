@@ -4,30 +4,42 @@ import (
 	"bufio"
 	"fmt"
 	"net"
-
-	"github.com/kube-peering/internal/pkg/io"
-	"github.com/kube-peering/internal/pkg/logger"
 )
 
 func main() {
-	io.StartTCPServer(":8080", func(s string) {}, handleConnection)
+	listener, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		panic(err)
+	}
+	defer listener.Close()
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Printf("got an err %v", err)
+			continue
+		}
+		go handleConnection(conn)
+	}
 }
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
+	fmt.Printf("Recived connection from client: %s", conn.RemoteAddr().String())
+
 	for {
 		reader := bufio.NewReader(conn)
 		msg, err := reader.ReadString('\n')
 		if err != nil {
-			logger.Z.Error(err)
+			fmt.Printf("got an err %v", err)
 			return
 		}
 
-		reply := fmt.Sprintf("replay: %s", msg)
+		reply := fmt.Sprintf("PONG: %s", msg)
 
 		conn.Write([]byte(reply))
 
-		logger.Z.Infof("Recived message from client: %s, replied: %s", msg, reply)
+		fmt.Printf("Recived message from client: %s, replied: %s", msg, reply)
 	}
 }
