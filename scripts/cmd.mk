@@ -21,3 +21,6 @@ install: build
 
 uninstall:
 	rm /usr/local/bin/$(COMMAND)
+
+build_linux:
+	GOOS=linux GOARCH=amd64 go build -o $(BUILD_BINARY) ./
