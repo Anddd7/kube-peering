@@ -12,15 +12,15 @@ import (
 func TestConnectCommand(t *testing.T) {
 	connectCmd.Run = util_test.MockRun
 
-	c, out, err := util_test.ExecuteCommandC(rootCmd, []string{"connect"}...)
+	c, out, err := util_test.ExecuteCommandC(rootCmd, []string{"connect", "-p", "8080"}...)
 
 	assert.Equal(t, "connect", c.Name())
 	assert.Empty(t, out)
 	assert.NoError(t, err)
 	assert.Equal(t,
 		&kpctl.Kpctl{
-			Backdoor:    model.DefaultBackdoor,
-			Application: model.CreateApplication("localhost", 8080),
+			Tunnel:    model.DefaultTunnel,
+			Forwarder: model.CreateForwarder("localhost", 8080),
 		},
 		instance,
 	)

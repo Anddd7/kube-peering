@@ -14,9 +14,13 @@ var startCmd = &cobra.Command{
 	Use: "start",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		logger.InitLogger(config.DebugMode, config.LogEncoder)
+		protocol := "tcp"
+		if flags.http {
+			protocol = "http"
+		}
 		instance = &kpeering.Kpeering{
-			Frontdoor: model.CreateFrontdoor(flags.protocol, flags.host, flags.port),
-			Backdoor:  model.DefaultBackdoor,
+			Interceptor: model.CreateInterceptor(protocol, flags.port),
+			Tunnel:      model.DefaultTunnel,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -25,14 +29,19 @@ var startCmd = &cobra.Command{
 }
 
 var flags = struct {
-	protocol string
-	host     string
-	port     int
+	tcp  bool
+	http bool
+	port int
 }{}
 
+//lintignore:errorcheck
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().StringVar(&flags.protocol, "protocol", "tcp", "the target protocol")
-	startCmd.Flags().StringVar(&flags.host, "host", "localhost", "the target host")
-	startCmd.Flags().IntVarP(&flags.port, "port", "p", config.DefautlFrontdoorPort, "the target port")
+	startCmd.Flags().BoolVar(&flags.tcp, "tcp", true, "build a tcp tunnel")
+	startCmd.Flags().BoolVar(&flags.http, "http", false, "build a http tunnel")
+	startCmd.Flags().IntVarP(&flags.port, "port", "p", 0, "the listening port")
+	err := startCmd.MarkFlagRequired("port")
+	if err != nil {
+		panic(err)
+	}
 }

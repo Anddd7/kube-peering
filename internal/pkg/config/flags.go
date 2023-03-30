@@ -4,6 +4,5 @@ var (
 	DebugMode  bool   = false
 	LogEncoder string = "plain"
 
-	DefautlFrontdoorPort = 10021
-	DefautlBackdoorPort  = 10022
+	DefautlTunnelPort = 10022
 )

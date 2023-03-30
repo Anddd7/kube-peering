@@ -1,34 +1,34 @@
 package model
 
-var DefaultBackdoor = CreateBackdoor("localhost", 10022)
+var DefaultTunnel = CreateTunnel("localhost", 10022)
 
-type Frontdoor struct {
+type Interceptor struct {
 	Endpoint
 }
 
-type Backdoor struct {
+type Tunnel struct {
 	Endpoint
 }
 
-type Application struct {
+type Forwarder struct {
 	Endpoint
 }
 
-func CreateFrontdoor(protocol, host string, port int) Frontdoor {
-	return Frontdoor{
+func CreateInterceptor(protocol string, port int) Interceptor {
+	return Interceptor{
 		Endpoint: Endpoint{
-			Name:       "frontdoor",
+			Name:       "interceptor",
 			Protocol:   protocol,
-			Host:       host,
+			Host:       "localhost",
 			ListenPort: port,
 		},
 	}
 }
 
-func CreateBackdoor(host string, port int) Backdoor {
-	return Backdoor{
+func CreateTunnel(host string, port int) Tunnel {
+	return Tunnel{
 		Endpoint: Endpoint{
-			Name:       "backdoor",
+			Name:       "tunnel",
 			Protocol:   "tcp",
 			Host:       host,
 			ListenPort: port,
@@ -36,8 +36,8 @@ func CreateBackdoor(host string, port int) Backdoor {
 	}
 }
 
-func CreateApplication(host string, port int) Application {
-	return Application{
+func CreateForwarder(host string, port int) Forwarder {
+	return Forwarder{
 		Endpoint: Endpoint{
 			Host:       host,
 			ListenPort: port,

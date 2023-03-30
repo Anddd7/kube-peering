@@ -15,8 +15,8 @@ var (
 		PreRun: func(cmd *cobra.Command, args []string) {
 			logger.InitLogger(config.DebugMode, config.LogEncoder)
 			instance = &kpctl.Kpctl{
-				Backdoor:    model.DefaultBackdoor,
-				Application: model.CreateApplication("localhost", 8080),
+				Tunnel:    model.DefaultTunnel,
+				Forwarder: model.CreateForwarder("localhost", 8080),
 			}
 		},
 		Run: func(cmd *cobra.Command, args []string) {
@@ -25,6 +25,19 @@ var (
 	}
 )
 
+var flags = struct {
+	tcp  bool
+	http bool
+	port int
+}{}
+
 func init() {
 	rootCmd.AddCommand(connectCmd)
+	connectCmd.Flags().BoolVar(&flags.tcp, "tcp", true, "build a tcp tunnel")
+	connectCmd.Flags().BoolVar(&flags.http, "http", false, "build a http tunnel")
+	connectCmd.Flags().IntVarP(&flags.port, "port", "p", 0, "the listening port")
+	err := connectCmd.MarkFlagRequired("port")
+	if err != nil {
+		panic(err)
+	}
 }
