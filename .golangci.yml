@@ -60,3 +60,12 @@ linters:
     - varcheck
     #- whitespace
   fast: false
+
+issues:
+  exclude-rules:
+    - path: (.+)_test.go
+      linters:
+        - errcheck
+    - path: example/(http|tcp)
+      linters:
+        - gosec

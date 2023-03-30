@@ -1,3 +1,4 @@
+// nolint:G102
 package main
 
 import (
@@ -38,8 +39,11 @@ func handleConnection(conn net.Conn) {
 
 		reply := fmt.Sprintf("PONG: %s", msg)
 
-		conn.Write([]byte(reply))
-
-		fmt.Printf("Recived message from client: %s, replied: %s", msg, reply)
+		_, err = conn.Write([]byte(reply))
+		if err != nil {
+			fmt.Printf("got an err %v", err)
+			return
+		}
+		fmt.Printf("Recived message from client, replied: %s", reply)
 	}
 }

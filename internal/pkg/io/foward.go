@@ -1,14 +1,14 @@
 package io
 
 import (
-	"net"
+	"io"
 
 	"github.com/kube-peering/internal/pkg/logger"
 )
 
 const bufferSize = 1024
 
-func ReadTo(conn net.Conn, buffer chan []byte) error {
+func ReadTo(conn io.Reader, buffer chan []byte) error {
 	for {
 		buf := make([]byte, bufferSize)
 		n, err := conn.Read(buf)
@@ -20,7 +20,7 @@ func ReadTo(conn net.Conn, buffer chan []byte) error {
 	}
 }
 
-func WriteTo(buffer chan []byte, conn net.Conn) error {
+func WriteTo(buffer chan []byte, conn io.Writer) error {
 	for buf := range buffer {
 		_, err := conn.Write(buf)
 		if err != nil {

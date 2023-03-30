@@ -1,11 +1,11 @@
 package util
 
 import (
-	"net"
+	"io"
 	"testing"
 )
 
-func AssertWrite(t *testing.T, conn net.Conn, data string) {
+func AssertWrite(t *testing.T, conn io.Writer, data string) {
 	t.Helper()
 	_, err := conn.Write([]byte(data))
 	if err != nil {
@@ -13,7 +13,7 @@ func AssertWrite(t *testing.T, conn net.Conn, data string) {
 	}
 }
 
-func AssertRead(t *testing.T, conn net.Conn, expected string) {
+func AssertRead(t *testing.T, conn io.Reader, expected string) {
 	t.Helper()
 	buffer := make([]byte, len(expected))
 	_, err := conn.Read(buffer)
