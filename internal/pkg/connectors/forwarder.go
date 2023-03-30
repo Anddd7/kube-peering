@@ -1,10 +1,11 @@
-package io
+package connectors
 
 import (
 	"context"
 	"net"
 	"os"
 
+	"github.com/kube-peering/internal/pkg/io"
 	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/model"
 )
@@ -49,13 +50,13 @@ func (t *TCPForwarder) Run() {
 	defer conn.Close()
 
 	go func() {
-		err := WriteTo(t.forwardChan, conn)
+		err := io.WriteTo(t.forwardChan, conn)
 		logger.Z.Errorf("[%s] failed to write to server: %v", t.name(), err)
 		cancel()
 	}()
 
 	go func() {
-		err := ReadTo(conn, t.backwordChan)
+		err := io.ReadTo(conn, t.backwordChan)
 		logger.Z.Errorf("[%s] failed to read from server: %v", t.name(), err)
 		cancel()
 	}()

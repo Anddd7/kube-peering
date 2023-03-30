@@ -3,7 +3,7 @@ package kpctl
 import (
 	"context"
 
-	"github.com/kube-peering/internal/pkg/io"
+	"github.com/kube-peering/internal/pkg/connectors"
 	"github.com/kube-peering/internal/pkg/model"
 )
 
@@ -17,8 +17,8 @@ func (ctl *Kpctl) Connect() {
 	reqChan := make(chan []byte)
 	resChan := make(chan []byte)
 
-	tunnel := io.NewTunnelClient(ctx, ctl.Tunnel, reqChan, resChan)
-	forwarder := io.NewTCPForwarder(ctx, ctl.Forwarder, reqChan, resChan)
+	tunnel := connectors.NewTunnelClient(ctx, ctl.Tunnel, reqChan, resChan)
+	forwarder := connectors.NewTCPForwarder(ctx, ctl.Forwarder, reqChan, resChan)
 
 	go tunnel.Run()
 	go forwarder.Run()

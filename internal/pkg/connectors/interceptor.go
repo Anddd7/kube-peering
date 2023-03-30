@@ -1,10 +1,11 @@
-package io
+package connectors
 
 import (
 	"context"
 	"net"
 	"sync"
 
+	"github.com/kube-peering/internal/pkg/io"
 	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/model"
 )
@@ -47,7 +48,7 @@ func (t *TCPInterceptor) Run() {
 		for {
 			t.wg.Wait()
 
-			err := ReadTo(t.conn, t.readInto)
+			err := io.ReadTo(t.conn, t.readInto)
 
 			t.close()
 
@@ -61,13 +62,13 @@ func (t *TCPInterceptor) Run() {
 		for {
 			t.wg.Wait()
 
-			err := WriteTo(t.writeFrom, t.conn)
+			err := io.WriteTo(t.writeFrom, t.conn)
 
 			logger.Z.Errorf("[%s] write coroutine is close as well, %v", t.name(), err)
 		}
 	}()
 
-	StartTCPServer(
+	io.StartTCPServer(
 		t.address,
 		func(s string) {
 			logger.Z.Infof("[%s] server is started on %s", t.name(), s)
@@ -103,6 +104,7 @@ func (t *TCPInterceptor) newConnection(c net.Conn) {
 		t.wg.Done()
 	} else {
 		logger.Z.Errorf("[%s] connection is already exists", t.name())
+		c.Write([]byte("connection is already exists"))
 		c.Close()
 	}
 }

@@ -3,7 +3,7 @@ package kpeering
 import (
 	"context"
 
-	"github.com/kube-peering/internal/pkg/io"
+	"github.com/kube-peering/internal/pkg/connectors"
 	"github.com/kube-peering/internal/pkg/model"
 )
 
@@ -17,8 +17,8 @@ func (cfg *Kpeering) Start() {
 	reqChan := make(chan []byte)
 	resChan := make(chan []byte)
 
-	interceptor := io.NewTCPInterceptor(ctx, cfg.Interceptor, reqChan, resChan)
-	tunnel := io.NewTunnelServer(ctx, cfg.Tunnel, reqChan, resChan)
+	interceptor := connectors.NewTCPInterceptor(ctx, cfg.Interceptor, reqChan, resChan)
+	tunnel := connectors.NewTunnelServer(ctx, cfg.Tunnel, reqChan, resChan)
 
 	go interceptor.Run()
 	go tunnel.Run()

@@ -1,5 +1,5 @@
 git_hooks:
-	ln -sf ./scripts/hooks/commit-msg .git/hooks/commit-msg
+	cp scripts/hooks/commit-msg .git/hooks/
 
 clean:
 	rm -rf bin

@@ -1,12 +1,5 @@
 #!/bin/sh
 
-if [[ $(git remote -v | grep github.com) ]]; then
-  echo "Commit Rules NOT enforced"
-  exit 0
-else
-  echo "Commit Rules enforced"
-fi
-
 MSG_FILE=$1
 FILE_CONTENT="$(cat $MSG_FILE)"
 
