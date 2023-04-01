@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	conn, err := net.Dial("tcp", ":10021")
+	conn, err := net.Dial("tcp", withProxy(true))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to connect to server: %v\n", err)
 		os.Exit(1)
@@ -29,4 +29,11 @@ func readServerMessage(conn io.Reader) {
 	for scanner.Scan() {
 		fmt.Println(scanner.Text())
 	}
+}
+
+func withProxy(on bool) string {
+	if on {
+		return ":10021"
+	}
+	return ":8080"
 }

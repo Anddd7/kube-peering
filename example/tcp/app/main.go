@@ -27,13 +27,13 @@ func main() {
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
-	fmt.Printf("Recived connection from client: %s", conn.RemoteAddr().String())
+	fmt.Printf("Recived connection from client: %s\n", conn.RemoteAddr().String())
 
 	for {
 		reader := bufio.NewReader(conn)
 		msg, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf("got an err %v", err)
+			fmt.Printf("got an err %v\n", err)
 			return
 		}
 
