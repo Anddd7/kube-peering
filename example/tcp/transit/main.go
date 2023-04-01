@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/kube-peering/internal/pkg/transit"
@@ -9,9 +8,9 @@ import (
 
 func main() {
 	interceptor := transit.NewInterceptor("tcp", 10021)
-	proxy := transit.NewProxy("tcp", ":8080")
+	forwarder := transit.NewFowarder("tcp", ":8080")
 	interceptor.OnTCPConnected = func(conn *net.TCPConn) {
-		proxy.ProxyTCP(conn)
+		forwarder.ForwardTCP(conn)
 	}
 
 	interceptor.Start()

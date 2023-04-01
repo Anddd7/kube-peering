@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type Proxy struct {
+type Forwarder struct {
 	ctx          context.Context
 	logger       *zap.SugaredLogger
 	protocol     string
@@ -21,7 +21,7 @@ type Proxy struct {
 	reverseProxy *httputil.ReverseProxy
 }
 
-func NewProxy(protocol string, remoteAddr string) *Proxy {
+func NewFowarder(protocol string, remoteAddr string) *Forwarder {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "proxy",
 		"protocol", protocol,
@@ -41,7 +41,7 @@ func NewProxy(protocol string, remoteAddr string) *Proxy {
 		}
 	}
 
-	return &Proxy{
+	return &Forwarder{
 		ctx:          context.TODO(),
 		logger:       _logger,
 		protocol:     protocol,
@@ -50,7 +50,7 @@ func NewProxy(protocol string, remoteAddr string) *Proxy {
 	}
 }
 
-func (t *Proxy) ProxyTCP(from *net.TCPConn) {
+func (t *Forwarder) ForwardTCP(from *net.TCPConn) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", t.remoteAddr)
 	if err != nil {
 		panic(err)
@@ -66,7 +66,7 @@ func (t *Proxy) ProxyTCP(from *net.TCPConn) {
 	t.pipe(from, to)
 }
 
-func (t *Proxy) pipe(from *net.TCPConn, to *net.TCPConn) {
+func (t *Forwarder) pipe(from *net.TCPConn, to *net.TCPConn) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
@@ -85,6 +85,6 @@ func (t *Proxy) pipe(from *net.TCPConn, to *net.TCPConn) {
 	wg.Wait()
 }
 
-func (t *Proxy) ProxyHttp(w http.ResponseWriter, r *http.Request) {
+func (t *Forwarder) ForwardHttp(w http.ResponseWriter, r *http.Request) {
 	t.reverseProxy.ServeHTTP(w, r)
 }

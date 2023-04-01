@@ -6,7 +6,7 @@ type TransitRouter struct {
 	// p2p tunnel with another transit router
 	tunnel Tunnel
 	// proxy for non-tunnel traffic
-	proxy Proxy
+	proxy Forwarder
 	// route table for in/out bound
 	routeTable RouteTable
 }
