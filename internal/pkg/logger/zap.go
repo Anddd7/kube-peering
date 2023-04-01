@@ -2,7 +2,6 @@ package logger
 
 import (
 	"os"
-	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -10,39 +9,54 @@ import (
 
 var Z *zap.SugaredLogger
 
+// deprecated: should init logger for each of component
 // by default, it will init simple logger
 func init() {
 	InitLogger(true, "plain")
 }
 
+// deprecated: should init logger for each of component
 func InitLogger(debugMode bool, logEncoder string) {
-	cfg := zap.NewProductionEncoderConfig()
-	cfg.MessageKey = "msg"
-	cfg.LevelKey = "level"
-	cfg.TimeKey = "time"
-	cfg.EncodeTime = zapcore.TimeEncoderOfLayout(time.RFC3339)
+	Z = createLogger(debugMode, logEncoder)
+}
+
+func createLogger(debugMode bool, logEncoder string) *zap.SugaredLogger {
+	var cfg zapcore.EncoderConfig
+	if debugMode {
+		cfg = zap.NewDevelopmentEncoderConfig()
+	} else {
+		cfg = zap.NewProductionEncoderConfig()
+	}
+
+	var encoder zapcore.Encoder
+	if logEncoder == "json" {
+		encoder = zapcore.NewJSONEncoder(cfg)
+	} else {
+		encoder = zapcore.NewConsoleEncoder(cfg)
+	}
+
+	var logLevel zapcore.Level
+	if debugMode {
+		logLevel = zapcore.DebugLevel
+	} else {
+		logLevel = zapcore.InfoLevel
+	}
 
 	core := zapcore.NewCore(
-		newEncoder(logEncoder, cfg),
+		encoder,
 		zapcore.Lock(zapcore.AddSync(os.Stdout)),
-		logLevel(debugMode),
+		logLevel,
 	)
 
-	logger := zap.New(core)
-
-	Z = logger.Sugar()
+	return zap.New(core).Sugar()
 }
 
-func newEncoder(logEncoder string, cfg zapcore.EncoderConfig) zapcore.Encoder {
-	if logEncoder == "json" {
-		return zapcore.NewJSONEncoder(cfg)
-	}
-	return zapcore.NewConsoleEncoder(cfg)
+func CreateLocalLogger() *zap.SugaredLogger {
+	return createLogger(true, "plain")
 }
-
-func logLevel(debugMode bool) zapcore.Level {
-	if debugMode {
-		return zapcore.DebugLevel
-	}
-	return zapcore.InfoLevel
+func CreateDevLogger() *zap.SugaredLogger {
+	return createLogger(true, "json")
+}
+func CreateProdLogger() *zap.SugaredLogger {
+	return createLogger(false, "json")
 }
