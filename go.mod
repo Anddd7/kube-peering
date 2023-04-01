@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/felixge/tcpkeepalive v0.0.0-20220224101934-f56176a53a1b
 	github.com/gorilla/mux v1.8.0
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/spf13/cobra v1.6.1

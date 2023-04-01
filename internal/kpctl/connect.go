@@ -13,6 +13,25 @@ type Kpctl struct {
 }
 
 func (ctl *Kpctl) Connect() {
+	if ctl.Tunnel.Protocol == "tcp" {
+		ctl.connectTCP()
+	}
+
+	if ctl.Tunnel.Protocol == "http" || ctl.Tunnel.Protocol == "https" {
+		ctl.connectHttp()
+	}
+}
+
+func (ctl *Kpctl) connectHttp() {
+	ctx := context.Background()
+	tunnel := connectors.NewHttp2TunnelClient(ctx, ctl.Tunnel)
+
+	go tunnel.Run()
+
+	<-ctx.Done()
+}
+
+func (ctl *Kpctl) connectTCP() {
 	ctx := context.Background()
 	reqChan := make(chan []byte)
 	resChan := make(chan []byte)

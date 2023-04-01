@@ -3,11 +3,13 @@ package connectors
 import (
 	"context"
 	"net"
+	"net/http"
 	"sync"
 
 	"github.com/kube-peering/internal/pkg/io"
 	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/model"
+	"golang.org/x/net/http2"
 )
 
 /*
@@ -107,4 +109,25 @@ func (t *TCPInterceptor) newConnection(c net.Conn) {
 		c.Write([]byte("connection is already exists"))
 		c.Close()
 	}
+}
+
+type Http2Interceptor struct {
+	ctx     context.Context
+	address string
+}
+
+func NewHttp2Interceptor(ctx context.Context, cfg model.Interceptor) *Http2Interceptor {
+	return &Http2Interceptor{
+		ctx:     context.WithValue(ctx, keyComponentID, cfg.Name),
+		address: cfg.Address(),
+	}
+}
+
+func (t *Http2Interceptor) name() string {
+	return t.ctx.Value(keyComponentID).(string)
+}
+
+func (t *Http2Interceptor) Run(fn http.HandlerFunc) {
+	http2.ConfigureServer(&http.Server{}, &http2.Server{})
+	http.ListenAndServe(t.address, fn)
 }

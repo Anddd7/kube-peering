@@ -20,7 +20,12 @@ var startCmd = &cobra.Command{
 		}
 		instance = &kpeering.Kpeering{
 			Interceptor: model.CreateInterceptor(protocol, flags.port),
-			Tunnel:      model.DefaultTunnel,
+			Tunnel: model.CreateTunnelServer(
+				"localhost", 10022,
+				"../../bin/server.key",
+				"../../bin/server.crt",
+				"localhost",
+			),
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
