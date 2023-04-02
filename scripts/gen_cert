@@ -7,11 +7,13 @@
 # https://go-review.googlesource.com/c/go/+/231379
 # https://github.com/virtualmin/virtualmin-gpl/issues/462#issuecomment-1267895524
 
-CA_KEY=bin/ca.key
-CA_CRT=bin/ca.crt
-SERVER_KEY=bin/server.key
-SERVER_CSR=bin/server.csr
-SERVER_CRT=bin/server.crt
+OUTPUT_DIR=bin
+
+CA_KEY=$OUTPUT_DIR/ca.key
+CA_CRT=$OUTPUT_DIR/ca.crt
+SERVER_KEY=$OUTPUT_DIR/server.key
+SERVER_CSR=$OUTPUT_DIR/server.csr
+SERVER_CRT=$OUTPUT_DIR/server.crt
 
 # create CA cert
 openssl genrsa -out $CA_KEY 2048
