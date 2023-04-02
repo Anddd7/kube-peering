@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 )
@@ -27,7 +28,8 @@ func main() {
 }
 
 func post(index int) {
-	resp, err := http.Post("http://localhost:10021/ping", "text/plain", strings.NewReader(fmt.Sprintf("PING %d", index)))
+	url := fmt.Sprintf("http://localhost%s/ping", port())
+	resp, err := http.Post(url, "text/plain", strings.NewReader(fmt.Sprintf("PING %d", index)))
 	if err != nil {
 		fmt.Printf("Error-%d: %v\n", index, err)
 		return
@@ -40,4 +42,11 @@ func post(index int) {
 	}
 
 	fmt.Printf("Response-%d: %s\n", index, string(body))
+}
+
+func port() string {
+	if len(os.Args) > 1 && os.Args[1] == "proxy" {
+		return ":10021"
+	}
+	return ":8080"
 }
