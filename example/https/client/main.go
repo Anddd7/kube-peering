@@ -1,57 +1,59 @@
 package main
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
-	"io/ioutil"
-	"log"
+	"io"
 	"net/http"
+	"os"
+	"strings"
+	"sync"
 
+	example "github.com/kube-peering/example"
 	"golang.org/x/net/http2"
+)
 
-	example "github.com/kube-peering/example/http2"
+const (
+	concurrency = 10
 )
 
 func main() {
-	client := &http.Client{Transport: transport2()}
+	wg := sync.WaitGroup{}
+	wg.Add(concurrency)
 
-	res, err := client.Get(fmt.Sprintf("https://%s/", example.Localhost))
-	if err != nil {
-		log.Fatal(err)
+	client := &http.Client{
+		Transport: &http2.Transport{
+			TLSClientConfig:    example.ClientTlsConfig,
+			DisableCompression: true,
+			AllowHTTP:          false,
+		},
+	}
+	url := fmt.Sprintf("https://localhost%s/ping", port())
+	for i := 0; i < concurrency; i++ {
+		go func(index int) {
+			defer wg.Done()
+
+			resp, err := client.Post(url, "text/plain", strings.NewReader(fmt.Sprintf("PING %d", index)))
+			if err != nil {
+				fmt.Printf("Error-%d: %v\n", index, err)
+				return
+			}
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Printf("Error-%d: %v\n", index, err)
+				return
+			}
+
+			fmt.Printf("Response-%d: %s\n", index, string(body))
+		}(i)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res.Body.Close()
-
-	fmt.Printf("Code: %d\n", res.StatusCode)
-	fmt.Printf("Body: %s\n", body)
+	wg.Wait()
 }
 
-func transport2() *http2.Transport {
-	return &http2.Transport{
-		TLSClientConfig:    tlsConfig(),
-		DisableCompression: true,
-		AllowHTTP:          false,
+func port() string {
+	if len(os.Args) > 1 && os.Args[1] == "proxy" {
+		return ":10021"
 	}
-}
-
-func tlsConfig() *tls.Config {
-	crt, err := ioutil.ReadFile(example.CertPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rootCAs := x509.NewCertPool()
-	rootCAs.AppendCertsFromPEM(crt)
-
-	return &tls.Config{
-		RootCAs:            rootCAs,
-		InsecureSkipVerify: false,
-		ServerName:         example.ServerName,
-	}
+	return ":8443"
 }
