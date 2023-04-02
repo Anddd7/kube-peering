@@ -76,7 +76,7 @@ func (t *Forwarder) pipe(from *net.TCPConn, to *net.TCPConn) {
 	}()
 
 	go func() {
-		t.logger.Info("transfer data back from %s to %s", to.RemoteAddr().String(), from.RemoteAddr().String())
+		t.logger.Infof("transfer data back from %s to %s", to.RemoteAddr().String(), from.RemoteAddr().String())
 		io.Copy(to, from)
 		wg.Done()
 	}()

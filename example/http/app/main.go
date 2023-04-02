@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 func pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Recived connection from client: %s", r.RemoteAddr)
+	fmt.Printf("Recived connection from client: %s\n", r.RemoteAddr)
 
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusBadRequest)
@@ -22,13 +23,13 @@ func pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
 
 	msg := string(body)
 
-	if msg != "PING" {
-		fmt.Printf("Recived message from client: %s", msg)
+	if !strings.Contains(msg, "PING") {
+		fmt.Printf("Recived message from client: %s\n", msg)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	fmt.Printf("Recived message from client: %s", msg)
+	fmt.Printf("Recived message from client: %s\n", msg)
 	fmt.Fprintf(w, "PONG: %s", msg)
 }
 
