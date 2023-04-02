@@ -32,7 +32,6 @@ func NewFowarder(protocol string, remoteAddr string) *Forwarder {
 		remoteUrl, err := url.Parse(remoteAddr)
 		if err != nil {
 			_logger.Panicln(err)
-			panic(err)
 		}
 		reverseProxy := httputil.NewSingleHostReverseProxy(remoteUrl)
 		reverseProxy.ModifyResponse = func(resp *http.Response) error {
@@ -53,12 +52,12 @@ func NewFowarder(protocol string, remoteAddr string) *Forwarder {
 func (t *Forwarder) ForwardTCP(from *net.TCPConn) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", t.remoteAddr)
 	if err != nil {
-		panic(err)
+		t.logger.Panicln(err)
 	}
 
 	to, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil {
-		panic(err)
+		t.logger.Panicln(err)
 	}
 	defer from.Close()
 	defer to.Close()

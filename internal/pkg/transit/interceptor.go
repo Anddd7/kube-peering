@@ -36,7 +36,6 @@ func (t *Interceptor) Start() {
 	if t.protocol == "tcp" {
 		if t.OnTCPConnected == nil {
 			t.logger.Panicln("OnTCPConnected is nil")
-			panic("OnTCPConnected is needed for tcp protocol")
 		}
 		t.startTCP(t.OnTCPConnected)
 	}
@@ -44,7 +43,6 @@ func (t *Interceptor) Start() {
 	if t.protocol == "http" {
 		if t.OnHTTPConnected == nil {
 			t.logger.Panicln("OnHTTPConnected is nil")
-			panic("OnHTTPConnected is needed for http protocol")
 		}
 		t.startHttp(t.OnHTTPConnected)
 	}
@@ -54,13 +52,11 @@ func (t *Interceptor) startTCP(onConnected func(conn *net.TCPConn)) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
 	if err != nil {
 		t.logger.Panicln(err)
-		panic(err)
 	}
 
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
 		t.logger.Panicln(err)
-		panic(err)
 	}
 	defer listener.Close()
 
