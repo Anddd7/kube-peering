@@ -27,13 +27,13 @@ func NewFowarder(protocol string, remoteAddr string) *Forwarder {
 		"protocol", protocol,
 	)
 
-	var reverseProxy httputil.ReverseProxy
+	var reverseProxy *httputil.ReverseProxy
 	if protocol == "http" {
 		remoteUrl, err := url.Parse(remoteAddr)
 		if err != nil {
 			_logger.Panicln(err)
 		}
-		reverseProxy := httputil.NewSingleHostReverseProxy(remoteUrl)
+		reverseProxy = httputil.NewSingleHostReverseProxy(remoteUrl)
 		reverseProxy.ModifyResponse = func(resp *http.Response) error {
 			resp.Header.Set("X-Proxy-Server", "kube-peering")
 			return nil
@@ -45,7 +45,7 @@ func NewFowarder(protocol string, remoteAddr string) *Forwarder {
 		logger:       _logger,
 		protocol:     protocol,
 		remoteAddr:   remoteAddr,
-		reverseProxy: &reverseProxy,
+		reverseProxy: reverseProxy,
 	}
 }
 
