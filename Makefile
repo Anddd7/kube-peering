@@ -29,19 +29,25 @@ example_tcp_app:
 	cd example/tcp/app && go run . $(args) && cd -
 example_tcp_client:
 	cd example/tcp/client && go run . $(args) && cd -
-example_tcp_transit:
-	cd example/tcp/transit && go run . $(args) && cd -
+example_tcp_proxy:
+	cd example/tcp/proxy && go run . $(args) && cd -
+example_tcp_tunnel:
+	cd example/tcp/tunnel && go run . $(args) && cd -
 
 example_http_app:
 	cd example/http/app && go run . $(args) && cd -
 example_http_client:
 	cd example/http/client && go run . $(args) && cd -
-example_http_transit:
-	cd example/http/transit && go run . $(args) && cd -
+example_http_proxy:
+	cd example/http/proxy && go run . $(args) && cd -
+example_http_tunnel:
+	cd example/http/tunnel && go run . $(args) && cd -
 
 example_https_app:
 	cd example/https/app && go run . $(args) && cd -
 example_https_client:
 	cd example/https/client && go run . $(args) && cd -
-example_https_transit:
-	cd example/https/transit && go run . $(args) && cd -
+example_https_proxy:
+	cd example/https/proxy && go run . $(args) && cd -
+example_https_tunnel:
+	cd example/https/tunnel && go run . $(args) && cd -
