@@ -2,6 +2,7 @@ package transit
 
 import (
 	"context"
+	"crypto/tls"
 	"io"
 	"net"
 	"net/http"
@@ -86,4 +87,39 @@ func (t *Forwarder) pipe(from *net.TCPConn, to *net.TCPConn) {
 
 func (t *Forwarder) ForwardHttp(w http.ResponseWriter, r *http.Request) {
 	t.reverseProxy.ServeHTTP(w, r)
+}
+
+func (t *Forwarder) ForwardTls(from *tls.Conn) {
+	tcpAddr, err := net.ResolveTCPAddr("tcp", t.remoteAddr)
+	if err != nil {
+		t.logger.Panicln(err)
+	}
+
+	to, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		t.logger.Panicln(err)
+	}
+	defer from.Close()
+	defer to.Close()
+
+	t.pipeTls(from, to)
+}
+
+func (t *Forwarder) pipeTls(from *tls.Conn, to *net.TCPConn) {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		t.logger.Infof("transfer data from %s to %s", from.RemoteAddr().String(), to.RemoteAddr().String())
+		io.Copy(from, to)
+		wg.Done()
+	}()
+
+	go func() {
+		t.logger.Infof("transfer data back from %s to %s", to.RemoteAddr().String(), from.RemoteAddr().String())
+		io.Copy(to, from)
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
