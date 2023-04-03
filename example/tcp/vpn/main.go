@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/tls"
+	"os"
 
 	"github.com/kube-peering/internal/pkg/transit"
 
@@ -16,23 +16,45 @@ func main() {
 }
 
 func server() {
-	// interceptor := transit.NewInterceptor("tcp", 10021)
-	tunnel := transit.NewTunnelServer("tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
-	fowarder := transit.NewFowarder("tcp", ":8080")
+	_, port := tunnelPorts()
+	tunnel := transit.NewTunnelServer(10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
-	tunnel.OnConnected = func(conn *tls.Conn) {
-		fowarder.ForwardTls(conn)
+	if port == 0 {
+		fowarder := transit.NewFowarder("tcp", ":8080")
+		tunnel.SetOnTlsConnected(fowarder.ForwardTls)
+	} else {
+		interceptor := transit.NewInterceptor("tcp", port)
+		interceptor.OnTCPConnected = tunnel.ForwardTls
+		go interceptor.Start()
 	}
 
 	go tunnel.Start()
 }
 
 func client() {
-	interceptor := transit.NewInterceptor("tcp", 10022)
+	port, _ := tunnelPorts()
 	tunnel := transit.NewTunnelClient("localhost:10086", example.TunnelCaCert, example.TunnelServerName)
 
-	interceptor.OnTCPConnected = tunnel.ForwardTls
+	if port == 0 {
+		fowarder := transit.NewFowarder("tcp", ":8080")
+		tunnel.SetOnTlsConnected(fowarder.ForwardTls)
+	} else {
+		interceptor := transit.NewInterceptor("tcp", port)
+		interceptor.OnTCPConnected = tunnel.ForwardTls
+		go interceptor.Start()
+	}
 
-	go interceptor.Start()
 	go tunnel.Start()
+}
+
+// client will connect to 10022
+// normal : client -> tunnel client --------> tunnel server -> server
+// reverse: client -> tunnel server --------> tunnel client -> server
+func tunnelPorts() (int, int) {
+	if len(os.Args) > 1 {
+		if os.Args[1] == "reverse" {
+			return 0, 10022
+		}
+	}
+	return 10022, 0
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"net"
-	"sync"
 	"time"
 
 	"github.com/kube-peering/internal/pkg/config"
@@ -14,12 +13,12 @@ import (
 
 // TunnelClient is a client that connects to a tunnel server
 type TunnelClient struct {
-	ctx        context.Context
-	logger     *zap.SugaredLogger
-	remoteAddr string
-	tlsConfig  *tls.Config
-	mutex      sync.Mutex
-	tlsConn    *tls.Conn
+	ctx            context.Context
+	logger         *zap.SugaredLogger
+	remoteAddr     string
+	tlsConfig      *tls.Config
+	tlsConn        *tls.Conn
+	onTlsConnected func(conn *tls.Conn)
 }
 
 func NewTunnelClient(remoteAddr, caCertPath, serverName string) *TunnelClient {
@@ -41,9 +40,6 @@ func NewTunnelClient(remoteAddr, caCertPath, serverName string) *TunnelClient {
 }
 
 func (t *TunnelClient) Start() {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
-
 	conn, err := tls.Dial("tcp", t.remoteAddr, t.tlsConfig)
 	if err != nil {
 		logger.Z.Errorf("failed to connect to %s: %v", t.remoteAddr, err)
@@ -51,6 +47,9 @@ func (t *TunnelClient) Start() {
 	}
 
 	t.tlsConn = conn
+	if t.onTlsConnected != nil {
+		t.OnTlsConnected(t.tlsConn)
+	}
 
 	// tcpkeepalive.SetKeepAlive(conn, 15*time.Minute, 3, 5*time.Second)
 
@@ -61,8 +60,8 @@ func (t *TunnelClient) Start() {
 }
 
 func (t *TunnelClient) ForwardTls(from *net.TCPConn) {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
+	// t.mutex.Lock()
+	// defer t.mutex.Unlock()
 
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
@@ -73,4 +72,11 @@ func (t *TunnelClient) ForwardTls(from *net.TCPConn) {
 	}
 
 	Pipe(t.logger, from, t.tlsConn)
+}
+
+func (t *TunnelClient) SetOnTlsConnected(fn func(conn *tls.Conn)) {
+	t.onTlsConnected = fn
+}
+func (t *TunnelClient) OnTlsConnected(from *tls.Conn) {
+	t.onTlsConnected(from)
 }

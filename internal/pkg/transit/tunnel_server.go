@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	"sync"
+	"time"
 
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
@@ -14,18 +14,15 @@ import (
 
 // TunnelServer is a server that listens for incoming tunnel connections
 type TunnelServer struct {
-	ctx       context.Context
-	logger    *zap.SugaredLogger
-	port      int
-	tlsConfig *tls.Config
-	mutex     sync.Mutex
-	// tlsConn        *tls.Conn
-	// clientConn     *http2.ClientConn
-	protocol    string
-	OnConnected func(conn *tls.Conn)
+	ctx            context.Context
+	logger         *zap.SugaredLogger
+	port           int
+	tlsConfig      *tls.Config
+	tlsConn        *tls.Conn
+	onTlsConnected func(conn *tls.Conn)
 }
 
-func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) *TunnelServer {
+func NewTunnelServer(port int, serverCertPath, serverKeyPath, serverName string) *TunnelServer {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"mode", "server",
@@ -38,7 +35,6 @@ func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, s
 	return &TunnelServer{
 		ctx:       context.TODO(),
 		logger:    _logger,
-		protocol:  protocol,
 		port:      port,
 		tlsConfig: tlsConfig,
 	}
@@ -67,12 +63,14 @@ func (t *TunnelServer) Start() {
 }
 
 func (t *TunnelServer) newConnection(conn *net.TCPConn) {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
-
 	t.logger.Infof("new connection from %s", conn.RemoteAddr().String())
 
 	tlsConn := tls.Server(conn, t.tlsConfig)
+
+	t.tlsConn = tlsConn
+	if t.onTlsConnected != nil {
+		t.OnTlsConnected(t.tlsConn)
+	}
 
 	// tlsConn, clientConn, err := t.initClientConn(conn)
 	// if err != nil {
@@ -80,12 +78,26 @@ func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	// 	return
 	// }
 
-	// t.tlsConn = tlsConn
 	// t.clientConn = clientConn
+}
 
-	if t.OnConnected != nil {
-		t.OnConnected(tlsConn)
+func (t *TunnelServer) ForwardTls(from *net.TCPConn) {
+	for i := 0; i < 3; i++ {
+		if t.tlsConn != nil {
+			break
+		}
+		t.logger.Warnf("tls connection is nil, try to reconnect")
+		time.Sleep(5 * time.Second)
 	}
+
+	Pipe(t.logger, from, t.tlsConn)
+}
+
+func (t *TunnelServer) SetOnTlsConnected(fn func(conn *tls.Conn)) {
+	t.onTlsConnected = fn
+}
+func (t *TunnelServer) OnTlsConnected(from *tls.Conn) {
+	t.onTlsConnected(from)
 }
 
 // func (t *TunnelServer) initClientConn(conn *net.TCPConn) (*tls.Conn, *http2.ClientConn, error) {

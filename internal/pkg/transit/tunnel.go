@@ -1,6 +1,7 @@
 package transit
 
 import (
+	"crypto/tls"
 	"io"
 	"net"
 	"sync"
@@ -10,7 +11,9 @@ import (
 
 type Tunnel interface {
 	Start()
-	Send()
+	SetOnTlsConnected(func(conn *tls.Conn))
+	ForwardTls(from *net.TCPConn)
+	OnTlsConnected(from *tls.Conn)
 }
 
 func Pipe(_logger *zap.SugaredLogger, from, to PipeConn) {
