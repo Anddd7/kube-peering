@@ -43,8 +43,13 @@ func main() {
 }
 
 func port() string {
-	if len(os.Args) > 1 && os.Args[1] == "proxy" {
-		return ":10021"
+	if len(os.Args) > 1 {
+		if os.Args[1] == "proxy" {
+			return ":10021"
+		}
+		if os.Args[1] == "vpn" {
+			return ":10022"
+		}
 	}
 	return ":8080"
 }

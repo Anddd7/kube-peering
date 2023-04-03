@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"io"
 	"net"
+	"net/http"
 	"sync"
 
 	"go.uber.org/zap"
@@ -12,8 +13,9 @@ import (
 type Tunnel interface {
 	Start()
 	SetOnTCPTunnelIn(func(conn *tls.Conn))
-	OnTCPTunnelIn(from *tls.Conn)
-	TunnelOut(from *net.TCPConn)
+	SetOnHttpTunnelIn(http.HandlerFunc)
+	TunnelTCPOut(from *net.TCPConn)
+	TunnelHttpOut(w http.ResponseWriter, r *http.Request)
 }
 
 func Pipe(_logger *zap.SugaredLogger, from, to PipeConn) {

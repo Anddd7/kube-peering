@@ -17,15 +17,15 @@ func main() {
 
 func server() {
 	_, port := tunnelPorts()
-	tunnel := transit.NewTunnelServer("tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
+	tunnel := transit.NewTunnelServer("http", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
 	if port == 0 {
 		fowarder := transit.NewFowarder("tcp", ":8080")
-		tunnel.SetOnTCPTunnelIn(fowarder.ForwardTls)
+		tunnel.SetOnHttpTunnelIn(fowarder.ForwardHttp)
 	} else {
-		interceptor := transit.NewInterceptor("tcp", port)
-		interceptor.OnTCPConnected = tunnel.TunnelTCPOut
-		go interceptor.Start()
+		// interceptor := transit.NewInterceptor("tcp", port)
+		// interceptor.OnHTTPConnected = tunnel.TunnelHttpOut
+		// go interceptor.Start()
 	}
 
 	go tunnel.Start()
@@ -33,14 +33,14 @@ func server() {
 
 func client() {
 	port, _ := tunnelPorts()
-	tunnel := transit.NewTunnelClient("tcp", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
+	tunnel := transit.NewTunnelClient("http", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
 
 	if port == 0 {
-		fowarder := transit.NewFowarder("tcp", ":8080")
-		tunnel.SetOnTCPTunnelIn(fowarder.ForwardTls)
+		// fowarder := transit.NewFowarder("tcp", ":8080")
+		// tunnel.SetOnHttpTunnelIn(fowarder.ForwardHttp)
 	} else {
-		interceptor := transit.NewInterceptor("tcp", port)
-		interceptor.OnTCPConnected = tunnel.TunnelTCPOut
+		interceptor := transit.NewInterceptor("http", port)
+		interceptor.OnHTTPConnected = tunnel.TunnelHttpOut
 		go interceptor.Start()
 	}
 

@@ -5,24 +5,29 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"net/http"
 	"time"
 
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
 	"go.uber.org/zap"
+	"golang.org/x/net/http2"
 )
 
 // TunnelServer is a server that listens for incoming tunnel connections
 type TunnelServer struct {
-	ctx           context.Context
-	logger        *zap.SugaredLogger
-	port          int
-	tlsConfig     *tls.Config
-	tlsConn       *tls.Conn
-	onTCPTunnelIn func(conn *tls.Conn)
+	ctx            context.Context
+	logger         *zap.SugaredLogger
+	protocol       string
+	port           int
+	tlsConfig      *tls.Config
+	tlsConn        *tls.Conn
+	onTCPTunnelIn  func(conn *tls.Conn)
+	clientConn     *http2.ClientConn
+	onHttpTunnelIn http.HandlerFunc
 }
 
-func NewTunnelServer(port int, serverCertPath, serverKeyPath, serverName string) *TunnelServer {
+func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) *TunnelServer {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"mode", "server",
@@ -35,6 +40,7 @@ func NewTunnelServer(port int, serverCertPath, serverKeyPath, serverName string)
 	return &TunnelServer{
 		ctx:       context.TODO(),
 		logger:    _logger,
+		protocol:  protocol,
 		port:      port,
 		tlsConfig: tlsConfig,
 	}
@@ -68,26 +74,31 @@ func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	tlsConn := tls.Server(conn, t.tlsConfig)
 
 	t.tlsConn = tlsConn
-	if t.onTCPTunnelIn != nil {
-		t.OnTCPTunnelIn(t.tlsConn)
+	if t.protocol == "tcp" {
+		if t.onTCPTunnelIn != nil {
+			t.logger.Infof("running tcp tunnel with %s, wait for data ...", conn.RemoteAddr().String())
+
+			t.onTCPTunnelIn(t.tlsConn)
+		}
 	}
 
-	// tlsConn, clientConn, err := t.initClientConn(conn)
-	// if err != nil {
-	// 	t.logger.Errorf("failed to create http2 connection: %v", err)
-	// 	return
-	// }
-
-	// t.clientConn = clientConn
+	if t.protocol == "http" {
+		// TODO
+	}
 }
 
-func (t *TunnelServer) TunnelOut(from *net.TCPConn) {
+func (t *TunnelServer) TunnelTCPOut(from *net.TCPConn) {
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
 			break
 		}
-		t.logger.Warnf("tls connection is nil, try to reconnect")
+		t.logger.Warnf("tunnel connection is nil, try to reconnect")
 		time.Sleep(5 * time.Second)
+	}
+
+	if t.tlsConn == nil {
+		t.logger.Panicln("tunnel connection is not ready")
+		return
 	}
 
 	Pipe(t.logger, from, t.tlsConn)
@@ -96,18 +107,6 @@ func (t *TunnelServer) TunnelOut(from *net.TCPConn) {
 func (t *TunnelServer) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {
 	t.onTCPTunnelIn = fn
 }
-func (t *TunnelServer) OnTCPTunnelIn(from *tls.Conn) {
-	t.onTCPTunnelIn(from)
+func (t *TunnelServer) SetOnHttpTunnelIn(fn http.HandlerFunc) {
+	t.onHttpTunnelIn = fn
 }
-
-// func (t *TunnelServer) initClientConn(conn *net.TCPConn) (*tls.Conn, *http2.ClientConn, error) {
-// 	tlsConn := tls.Server(conn, t.tlsConfig)
-// 	tr := &http2.Transport{}
-// 	clientConn, err := tr.NewClientConn(tlsConn)
-// 	if err != nil {
-// 		conn.Close()
-// 		return nil, nil, err
-// 	}
-
-// 	return tlsConn, clientConn, nil
-// }

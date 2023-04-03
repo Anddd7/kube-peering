@@ -21,9 +21,11 @@ func InitLogger(debugMode bool, logEncoder string) {
 }
 
 func createLogger(debugMode bool, logEncoder string) *zap.SugaredLogger {
+	var options []zap.Option
 	var cfg zapcore.EncoderConfig
 	if debugMode {
 		cfg = zap.NewDevelopmentEncoderConfig()
+		options = append(options, zap.AddCaller())
 	} else {
 		cfg = zap.NewProductionEncoderConfig()
 	}
@@ -48,7 +50,7 @@ func createLogger(debugMode bool, logEncoder string) *zap.SugaredLogger {
 		logLevel,
 	)
 
-	return zap.New(core).Sugar()
+	return zap.New(core, options...).Sugar()
 }
 
 func CreateLocalLogger() *zap.SugaredLogger {
