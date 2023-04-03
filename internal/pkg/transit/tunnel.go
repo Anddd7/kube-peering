@@ -12,9 +12,11 @@ import (
 
 type Tunnel interface {
 	Start()
+
 	SetOnTCPTunnelIn(func(conn *tls.Conn))
-	SetOnHttpTunnelIn(http.HandlerFunc)
 	TunnelTCPOut(from *net.TCPConn)
+
+	SetOnHttpTunnelIn(http.HandlerFunc)
 	TunnelHttpOut(w http.ResponseWriter, r *http.Request)
 }
 

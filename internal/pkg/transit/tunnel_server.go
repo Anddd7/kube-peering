@@ -3,10 +3,7 @@ package transit
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
-	"net"
 	"net/http"
-	"time"
 
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
@@ -27,7 +24,7 @@ type TunnelServer struct {
 	onHttpTunnelIn http.HandlerFunc
 }
 
-func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) *TunnelServer {
+func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"mode", "server",
@@ -47,66 +44,10 @@ func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, s
 }
 
 func (t *TunnelServer) Start() {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
-	if err != nil {
-		t.logger.Panicln(err)
-	}
-
-	listener, err := net.ListenTCP("tcp", tcpAddr)
-	if err != nil {
-		t.logger.Panicln(err)
-	}
-	defer listener.Close()
-
-	for {
-		conn, err := listener.AcceptTCP()
-		if err != nil {
-			t.logger.Error("", err)
-			continue
-		}
-		go t.newConnection(conn)
-	}
-}
-
-func (t *TunnelServer) newConnection(conn *net.TCPConn) {
-	t.logger.Infof("new connection from %s", conn.RemoteAddr().String())
-
-	tlsConn := tls.Server(conn, t.tlsConfig)
-
-	t.tlsConn = tlsConn
 	if t.protocol == "tcp" {
-		if t.onTCPTunnelIn != nil {
-			t.logger.Infof("running tcp tunnel with %s, wait for data ...", conn.RemoteAddr().String())
-
-			t.onTCPTunnelIn(t.tlsConn)
-		}
+		t.startTCP()
 	}
-
 	if t.protocol == "http" {
-		// TODO
+		t.startHttp()
 	}
-}
-
-func (t *TunnelServer) TunnelTCPOut(from *net.TCPConn) {
-	for i := 0; i < 3; i++ {
-		if t.tlsConn != nil {
-			break
-		}
-		t.logger.Warnf("tunnel connection is nil, try to reconnect")
-		time.Sleep(5 * time.Second)
-	}
-
-	if t.tlsConn == nil {
-		t.logger.Panicln("tunnel connection is not ready")
-		return
-	}
-
-	Pipe(t.logger, from, t.tlsConn)
-}
-
-func (t *TunnelServer) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {
-	t.onTCPTunnelIn = fn
-}
-func (t *TunnelServer) SetOnHttpTunnelIn(fn http.HandlerFunc) {
-	t.onHttpTunnelIn = fn
 }
