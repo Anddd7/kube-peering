@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+mkdir -p bin/mutual
+
+OUTPUT_DIR=bin/mutual
+
+CA_KEY=$OUTPUT_DIR/ca.key
+CA_CRT=$OUTPUT_DIR/ca.crt
+
+SERVER_KEY=$OUTPUT_DIR/server.key
+SERVER_CSR=$OUTPUT_DIR/server.csr
+SERVER_CRT=$OUTPUT_DIR/server.crt
+
+CLIENT_KEY=$OUTPUT_DIR/client.key
+CLIENT_CSR=$OUTPUT_DIR/client.csr
+CLIENT_CRT=$OUTPUT_DIR/client.crt
+
+
+# 生成 CA 私钥
+openssl genrsa -out $CA_KEY 2048
+# 生成 CA 自签证书
+openssl req -new -x509 -days 3650 -key $CA_KEY -out $CA_CRT -subj "/C=CN/ST=SC/L=CD/O=Anddd7/CN=Anddd7 Root CA"
+
+# 生成服务器私钥和证书签名请求
+openssl genrsa -out $SERVER_KEY 2048
+openssl req -new -key $SERVER_KEY -out $SERVER_CSR -subj "/C=CN/ST=SC/L=CD/O=Anddd7/CN=localhost"
+# 使用 CA 证书对服务器证书签名
+openssl x509 -req -in $SERVER_CSR -CA $CA_CRT -CAkey $CA_KEY -CAcreateserial -out $SERVER_CRT -days 3650
+
+# 生成客户端私钥和证书签名请求
+openssl genrsa -out $CLIENT_KEY 2048
+openssl req -new -key $CLIENT_KEY -out $CLIENT_CSR -subj "/C=CN/ST=SC/L=CD/O=Anddd7/CN=Client"
+# 使用 CA 证书对客户端证书签名
+openssl x509 -req -in $CLIENT_CSR -CA $CA_CRT -CAkey $CA_KEY -CAcreateserial -out $CLIENT_CRT -days 3650

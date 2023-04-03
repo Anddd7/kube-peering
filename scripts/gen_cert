@@ -15,10 +15,10 @@ SERVER_KEY=$OUTPUT_DIR/server.key
 SERVER_CSR=$OUTPUT_DIR/server.csr
 SERVER_CRT=$OUTPUT_DIR/server.crt
 
-# create CA cert
+# create self signed CA key/cert
 openssl genrsa -out $CA_KEY 2048
 openssl req -new -x509 -days 365 -key $CA_KEY -subj "/C=CN/ST=SC/L=CD/O=Anddd7/CN=Anddd7 Root CA" -out $CA_CRT
-# create CSR
+# create server key/csr
 openssl req -newkey rsa:2048 -nodes -keyout $SERVER_KEY -subj "/C=CN/ST=SC/L=CD/O=Anddd7/CN=localhost" -out $SERVER_CSR
-# create server cert
+# create server cert and sign with csr
 openssl x509 -req -extfile <(printf "subjectAltName=DNS:localhost") -days 365 -in $SERVER_CSR -CA $CA_CRT -CAkey $CA_KEY -CAcreateserial -out $SERVER_CRT
