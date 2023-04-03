@@ -3,12 +3,10 @@ package transit
 import (
 	"context"
 	"crypto/tls"
-	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"sync"
 
 	"github.com/kube-peering/internal/pkg/logger"
 	"go.uber.org/zap"
@@ -60,29 +58,8 @@ func (t *Forwarder) ForwardTCP(from *net.TCPConn) {
 	if err != nil {
 		t.logger.Panicln(err)
 	}
-	defer from.Close()
-	defer to.Close()
 
-	t.pipe(from, to)
-}
-
-func (t *Forwarder) pipe(from *net.TCPConn, to *net.TCPConn) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
-	go func() {
-		t.logger.Infof("transfer data from %s to %s", from.RemoteAddr().String(), to.RemoteAddr().String())
-		io.Copy(from, to)
-		wg.Done()
-	}()
-
-	go func() {
-		t.logger.Infof("transfer data back from %s to %s", to.RemoteAddr().String(), from.RemoteAddr().String())
-		io.Copy(to, from)
-		wg.Done()
-	}()
-
-	wg.Wait()
+	Pipe(t.logger, from, to)
 }
 
 func (t *Forwarder) ForwardHttp(w http.ResponseWriter, r *http.Request) {
@@ -99,27 +76,6 @@ func (t *Forwarder) ForwardTls(from *tls.Conn) {
 	if err != nil {
 		t.logger.Panicln(err)
 	}
-	defer from.Close()
-	defer to.Close()
 
-	t.pipeTls(from, to)
-}
-
-func (t *Forwarder) pipeTls(from *tls.Conn, to *net.TCPConn) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
-	go func() {
-		t.logger.Infof("transfer data from %s to %s", from.RemoteAddr().String(), to.RemoteAddr().String())
-		io.Copy(from, to)
-		wg.Done()
-	}()
-
-	go func() {
-		t.logger.Infof("transfer data back from %s to %s", to.RemoteAddr().String(), from.RemoteAddr().String())
-		io.Copy(to, from)
-		wg.Done()
-	}()
-
-	wg.Wait()
+	Pipe(t.logger, from, to)
 }

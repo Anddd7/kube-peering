@@ -21,8 +21,8 @@ type TunnelServer struct {
 	mutex     sync.Mutex
 	// tlsConn        *tls.Conn
 	// clientConn     *http2.ClientConn
-	protocol       string
-	OnTlsConnected func(conn *tls.Conn)
+	protocol    string
+	OnConnected func(conn *tls.Conn)
 }
 
 func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) *TunnelServer {
@@ -83,8 +83,8 @@ func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	// t.tlsConn = tlsConn
 	// t.clientConn = clientConn
 
-	if t.OnTlsConnected != nil {
-		t.OnTlsConnected(tlsConn)
+	if t.OnConnected != nil {
+		t.OnConnected(tlsConn)
 	}
 }
 

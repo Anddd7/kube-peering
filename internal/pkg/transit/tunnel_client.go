@@ -3,7 +3,6 @@ package transit
 import (
 	"context"
 	"crypto/tls"
-	"io"
 	"net"
 	"sync"
 	"time"
@@ -61,7 +60,7 @@ func (t *TunnelClient) Start() {
 	// })
 }
 
-func (t *TunnelClient) ForwardTls(conn *net.TCPConn) {
+func (t *TunnelClient) ForwardTls(from *net.TCPConn) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -73,24 +72,5 @@ func (t *TunnelClient) ForwardTls(conn *net.TCPConn) {
 		time.Sleep(5 * time.Second)
 	}
 
-	t.pipe(conn, t.tlsConn)
-}
-
-func (t *TunnelClient) pipe(from *net.TCPConn, to *tls.Conn) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
-	go func() {
-		t.logger.Infof("transfer data from %s to %s", from.RemoteAddr().String(), to.RemoteAddr().String())
-		io.Copy(from, to)
-		wg.Done()
-	}()
-
-	go func() {
-		t.logger.Infof("transfer data back from %s to %s", to.RemoteAddr().String(), from.RemoteAddr().String())
-		io.Copy(to, from)
-		wg.Done()
-	}()
-
-	wg.Wait()
+	Pipe(t.logger, from, t.tlsConn)
 }

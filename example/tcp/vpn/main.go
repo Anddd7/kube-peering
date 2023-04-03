@@ -20,7 +20,7 @@ func server() {
 	tunnel := transit.NewTunnelServer("tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 	fowarder := transit.NewFowarder("tcp", ":8080")
 
-	tunnel.OnTlsConnected = func(conn *tls.Conn) {
+	tunnel.OnConnected = func(conn *tls.Conn) {
 		fowarder.ForwardTls(conn)
 	}
 
