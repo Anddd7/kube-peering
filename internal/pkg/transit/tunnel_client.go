@@ -24,7 +24,7 @@ type TunnelClient struct {
 func NewTunnelClient(remoteAddr, caCertPath, serverName string) *TunnelClient {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
-		"mode", "server",
+		"mode", "client",
 	)
 	tlsConfig, err := config.LoadClientTlsConfig(caCertPath, serverName)
 	if err != nil {

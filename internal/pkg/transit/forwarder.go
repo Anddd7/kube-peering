@@ -22,7 +22,7 @@ type Forwarder struct {
 
 func NewFowarder(protocol string, remoteAddr string) *Forwarder {
 	_logger := logger.CreateLocalLogger().With(
-		"component", "proxy",
+		"component", "forwarder",
 		"protocol", protocol,
 	)
 
