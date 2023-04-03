@@ -13,12 +13,12 @@ import (
 
 // TunnelClient is a client that connects to a tunnel server
 type TunnelClient struct {
-	ctx            context.Context
-	logger         *zap.SugaredLogger
-	remoteAddr     string
-	tlsConfig      *tls.Config
-	tlsConn        *tls.Conn
-	onTlsConnected func(conn *tls.Conn)
+	ctx           context.Context
+	logger        *zap.SugaredLogger
+	remoteAddr    string
+	tlsConfig     *tls.Config
+	tlsConn       *tls.Conn
+	onTCPTunnelIn func(conn *tls.Conn)
 }
 
 func NewTunnelClient(remoteAddr, caCertPath, serverName string) *TunnelClient {
@@ -47,8 +47,8 @@ func (t *TunnelClient) Start() {
 	}
 
 	t.tlsConn = conn
-	if t.onTlsConnected != nil {
-		t.OnTlsConnected(t.tlsConn)
+	if t.onTCPTunnelIn != nil {
+		t.OnTCPTunnelIn(t.tlsConn)
 	}
 
 	// tcpkeepalive.SetKeepAlive(conn, 15*time.Minute, 3, 5*time.Second)
@@ -59,7 +59,7 @@ func (t *TunnelClient) Start() {
 	// })
 }
 
-func (t *TunnelClient) ForwardTls(from *net.TCPConn) {
+func (t *TunnelClient) TunnelOut(from *net.TCPConn) {
 	// t.mutex.Lock()
 	// defer t.mutex.Unlock()
 
@@ -74,9 +74,9 @@ func (t *TunnelClient) ForwardTls(from *net.TCPConn) {
 	Pipe(t.logger, from, t.tlsConn)
 }
 
-func (t *TunnelClient) SetOnTlsConnected(fn func(conn *tls.Conn)) {
-	t.onTlsConnected = fn
+func (t *TunnelClient) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {
+	t.onTCPTunnelIn = fn
 }
-func (t *TunnelClient) OnTlsConnected(from *tls.Conn) {
-	t.onTlsConnected(from)
+func (t *TunnelClient) OnTCPTunnelIn(from *tls.Conn) {
+	t.onTCPTunnelIn(from)
 }

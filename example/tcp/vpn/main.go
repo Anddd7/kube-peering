@@ -21,10 +21,10 @@ func server() {
 
 	if port == 0 {
 		fowarder := transit.NewFowarder("tcp", ":8080")
-		tunnel.SetOnTlsConnected(fowarder.ForwardTls)
+		tunnel.SetOnTCPTunnelIn(fowarder.ForwardTls)
 	} else {
 		interceptor := transit.NewInterceptor("tcp", port)
-		interceptor.OnTCPConnected = tunnel.ForwardTls
+		interceptor.OnTCPConnected = tunnel.TunnelOut
 		go interceptor.Start()
 	}
 
@@ -37,10 +37,10 @@ func client() {
 
 	if port == 0 {
 		fowarder := transit.NewFowarder("tcp", ":8080")
-		tunnel.SetOnTlsConnected(fowarder.ForwardTls)
+		tunnel.SetOnTCPTunnelIn(fowarder.ForwardTls)
 	} else {
 		interceptor := transit.NewInterceptor("tcp", port)
-		interceptor.OnTCPConnected = tunnel.ForwardTls
+		interceptor.OnTCPConnected = tunnel.TunnelOut
 		go interceptor.Start()
 	}
 

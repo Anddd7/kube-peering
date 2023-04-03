@@ -11,9 +11,9 @@ import (
 
 type Tunnel interface {
 	Start()
-	SetOnTlsConnected(func(conn *tls.Conn))
-	ForwardTls(from *net.TCPConn)
-	OnTlsConnected(from *tls.Conn)
+	SetOnTCPTunnelIn(func(conn *tls.Conn))
+	OnTCPTunnelIn(from *tls.Conn)
+	TunnelOut(from *net.TCPConn)
 }
 
 func Pipe(_logger *zap.SugaredLogger, from, to PipeConn) {

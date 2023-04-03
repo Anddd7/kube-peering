@@ -14,12 +14,12 @@ import (
 
 // TunnelServer is a server that listens for incoming tunnel connections
 type TunnelServer struct {
-	ctx            context.Context
-	logger         *zap.SugaredLogger
-	port           int
-	tlsConfig      *tls.Config
-	tlsConn        *tls.Conn
-	onTlsConnected func(conn *tls.Conn)
+	ctx           context.Context
+	logger        *zap.SugaredLogger
+	port          int
+	tlsConfig     *tls.Config
+	tlsConn       *tls.Conn
+	onTCPTunnelIn func(conn *tls.Conn)
 }
 
 func NewTunnelServer(port int, serverCertPath, serverKeyPath, serverName string) *TunnelServer {
@@ -68,8 +68,8 @@ func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	tlsConn := tls.Server(conn, t.tlsConfig)
 
 	t.tlsConn = tlsConn
-	if t.onTlsConnected != nil {
-		t.OnTlsConnected(t.tlsConn)
+	if t.onTCPTunnelIn != nil {
+		t.OnTCPTunnelIn(t.tlsConn)
 	}
 
 	// tlsConn, clientConn, err := t.initClientConn(conn)
@@ -81,7 +81,7 @@ func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	// t.clientConn = clientConn
 }
 
-func (t *TunnelServer) ForwardTls(from *net.TCPConn) {
+func (t *TunnelServer) TunnelOut(from *net.TCPConn) {
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
 			break
@@ -93,11 +93,11 @@ func (t *TunnelServer) ForwardTls(from *net.TCPConn) {
 	Pipe(t.logger, from, t.tlsConn)
 }
 
-func (t *TunnelServer) SetOnTlsConnected(fn func(conn *tls.Conn)) {
-	t.onTlsConnected = fn
+func (t *TunnelServer) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {
+	t.onTCPTunnelIn = fn
 }
-func (t *TunnelServer) OnTlsConnected(from *tls.Conn) {
-	t.onTlsConnected(from)
+func (t *TunnelServer) OnTCPTunnelIn(from *tls.Conn) {
+	t.onTCPTunnelIn(from)
 }
 
 // func (t *TunnelServer) initClientConn(conn *net.TCPConn) (*tls.Conn, *http2.ClientConn, error) {
