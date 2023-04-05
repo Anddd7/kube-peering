@@ -9,17 +9,6 @@ import (
 
 var Z *zap.SugaredLogger
 
-// deprecated: should init logger for each of component
-// by default, it will init simple logger
-func init() {
-	InitLogger(true, "plain")
-}
-
-// deprecated: should init logger for each of component
-func InitLogger(debugMode bool, logEncoder string) {
-	Z = createLogger(debugMode, logEncoder)
-}
-
 func createLogger(debugMode bool, logEncoder string) *zap.SugaredLogger {
 	var options []zap.Option
 	var cfg zapcore.EncoderConfig

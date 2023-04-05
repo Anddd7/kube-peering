@@ -21,10 +21,10 @@ func server() {
 
 	if port == 0 {
 		fowarder := pkg.NewFowarder("tcp", ":8080")
-		tunnel.SetOnHttpTunnelIn(fowarder.ForwardHttp)
+		tunnel.SetOnHTTPTunnelIn(fowarder.ForwardHTTP)
 	} else {
 		// interceptor := pkg.NewInterceptor("tcp", port)
-		// interceptor.OnHTTPConnected = tunnel.TunnelHttpOut
+		// interceptor.OnHTTPConnected = tunnel.TunnelHTTPOut
 		// go interceptor.Start()
 	}
 
@@ -37,10 +37,10 @@ func client() {
 
 	if port == 0 {
 		// fowarder := pkg.NewFowarder("tcp", ":8080")
-		// tunnel.SetOnHttpTunnelIn(fowarder.ForwardHttp)
+		// tunnel.SetOnHTTPTunnelIn(fowarder.ForwardHTTP)
 	} else {
 		interceptor := pkg.NewInterceptor("http", port)
-		interceptor.OnHTTPConnected = tunnel.TunnelHttpOut
+		interceptor.OnHTTPConnected = tunnel.TunnelHTTPOut
 		go interceptor.Start()
 	}
 

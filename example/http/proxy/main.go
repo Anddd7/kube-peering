@@ -25,6 +25,6 @@ func tcp() {
 func http() {
 	interceptor := pkg.NewInterceptor("http", 10021)
 	forwarder := pkg.NewFowarder("http", "http://localhost:8080")
-	interceptor.OnHTTPConnected = forwarder.ForwardHttp
+	interceptor.OnHTTPConnected = forwarder.ForwardHTTP
 	interceptor.Start()
 }

@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/kube-peering/internal/pkg"
+	"github.com/kube-peering/internal/pkg/util"
 )
 
 func (t *TunnelServer) startTCP() {
@@ -34,8 +34,7 @@ func (t *TunnelServer) startTCP() {
 func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	t.logger.Infof("new connection from %s", conn.RemoteAddr().String())
 
-	tlsConn := tls.Server(conn, t.tlsConfig)
-	t.tlsConn = tlsConn
+	t.tlsConn = tls.Server(conn, t.tlsConfig)
 	if t.onTCPTunnelIn != nil {
 		t.logger.Infof("running tcp tunnel with %s, wait for data ...", conn.RemoteAddr().String())
 
@@ -57,7 +56,7 @@ func (t *TunnelServer) TunnelTCPOut(from *net.TCPConn) {
 		return
 	}
 
-	pkg.Pipe(t.logger, from, t.tlsConn)
+	util.Pipe(t.logger, from, t.tlsConn)
 }
 
 func (t *TunnelServer) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {

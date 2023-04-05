@@ -22,7 +22,7 @@ type TunnelClient struct {
 	tlsConn        *tls.Conn
 	onTCPTunnelIn  func(conn *tls.Conn)
 	clientConn     *http2.ClientConn
-	onHttpTunnelIn http.HandlerFunc
+	onHTTPTunnelIn http.HandlerFunc
 }
 
 func NewTunnelClient(protocol, remoteAddr, caCertPath, serverName string) pkg.Tunnel {
@@ -50,6 +50,6 @@ func (t *TunnelClient) Start() {
 	}
 
 	if t.protocol == "http" {
-		t.startHttp()
+		t.startHTTP()
 	}
 }

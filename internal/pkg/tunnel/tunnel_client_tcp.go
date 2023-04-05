@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/kube-peering/internal/pkg/logger"
-	"github.com/kube-peering/internal/pkg"
+	"github.com/kube-peering/internal/pkg/util"
 )
 
 func (t *TunnelClient) startTCP() {
@@ -37,7 +37,7 @@ func (t *TunnelClient) TunnelTCPOut(from *net.TCPConn) {
 		return
 	}
 
-	pkg.Pipe(t.logger, from, t.tlsConn)
+	util.Pipe(t.logger, from, t.tlsConn)
 }
 
 func (t *TunnelClient) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {

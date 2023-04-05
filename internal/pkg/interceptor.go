@@ -44,7 +44,7 @@ func (t *Interceptor) Start() {
 		if t.OnHTTPConnected == nil {
 			t.logger.Panicln("OnHTTPConnected is nil")
 		}
-		t.startHttp(t.OnHTTPConnected)
+		t.startHTTP(t.OnHTTPConnected)
 	}
 }
 
@@ -70,7 +70,7 @@ func (t *Interceptor) startTCP(onConnected func(conn *net.TCPConn)) {
 	}
 }
 
-func (t *Interceptor) startHttp(onConnected http.HandlerFunc) {
+func (t *Interceptor) startHTTP(onConnected http.HandlerFunc) {
 	http2.ConfigureServer(&http.Server{}, &http2.Server{})
 	http.ListenAndServe(fmt.Sprintf(":%d", t.port), onConnected)
 }

@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func (t *TunnelClient) startHttp() {
+func (t *TunnelClient) startHTTP() {
 	// TODO
 	// create http2 connection
 	// wrap the income data into the customized http request
@@ -13,10 +13,10 @@ func (t *TunnelClient) startHttp() {
 	// send back the response similar like the request
 }
 
-func (t *TunnelClient) TunnelHttpOut(w http.ResponseWriter, r *http.Request) {
+func (t *TunnelClient) TunnelHTTPOut(w http.ResponseWriter, r *http.Request) {
 	// TODO
 }
 
-func (t *TunnelClient) SetOnHttpTunnelIn(fn http.HandlerFunc) {
-	t.onHttpTunnelIn = fn
+func (t *TunnelClient) SetOnHTTPTunnelIn(fn http.HandlerFunc) {
+	t.onHTTPTunnelIn = fn
 }

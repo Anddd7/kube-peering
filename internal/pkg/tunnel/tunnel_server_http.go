@@ -4,14 +4,14 @@ import (
 	"net/http"
 )
 
-func (t *TunnelServer) startHttp() {
+func (t *TunnelServer) startHTTP() {
 	// TODO
 }
 
-func (t *TunnelServer) TunnelHttpOut(w http.ResponseWriter, r *http.Request) {
+func (t *TunnelServer) TunnelHTTPOut(w http.ResponseWriter, r *http.Request) {
 	// TODO
 }
 
-func (t *TunnelServer) SetOnHttpTunnelIn(fn http.HandlerFunc) {
-	t.onHttpTunnelIn = fn
+func (t *TunnelServer) SetOnHTTPTunnelIn(fn http.HandlerFunc) {
+	t.onHTTPTunnelIn = fn
 }
