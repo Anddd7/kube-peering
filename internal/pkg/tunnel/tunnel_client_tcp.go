@@ -4,14 +4,13 @@ import (
 	"crypto/tls"
 	"time"
 
-	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/util"
 )
 
 func (t *TunnelClient) startTCP() {
 	conn, err := tls.Dial("tcp", t.remoteAddr, t.tlsConfig)
 	if err != nil {
-		logger.Z.Errorf("failed to connect to %s: %v", t.remoteAddr, err)
+		t.logger.Errorf("failed to connect to %s: %v", t.remoteAddr, err)
 		return
 	}
 

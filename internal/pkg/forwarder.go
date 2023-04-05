@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -54,7 +55,7 @@ func (t *Forwarder) initReverseProxy() {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	remoteUrl, err := url.Parse(t.remoteAddr)
+	remoteUrl, err := url.Parse(fmt.Sprintf("%s://%s", t.protocol, t.remoteAddr))
 	if err != nil {
 		t.logger.Panicln(err)
 	}

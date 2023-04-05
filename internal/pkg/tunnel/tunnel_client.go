@@ -10,7 +10,6 @@ import (
 	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/util"
 	"go.uber.org/zap"
-	"golang.org/x/net/http2"
 )
 
 // TunnelClient is a client that connects to a tunnel server
@@ -22,7 +21,7 @@ type TunnelClient struct {
 	tlsConfig    *tls.Config
 	tlsConn      *tls.Conn
 	onTCPTunnel  func(conn util.PipeConn)
-	clientConn   *http2.ClientConn
+	httpClient   *http.Client
 	onHTTPTunnel http.HandlerFunc
 }
 

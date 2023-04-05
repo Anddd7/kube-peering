@@ -7,8 +7,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var Z *zap.SugaredLogger
-
 func createLogger(debugMode bool, logEncoder string) *zap.SugaredLogger {
 	var options []zap.Option
 	var cfg zapcore.EncoderConfig
