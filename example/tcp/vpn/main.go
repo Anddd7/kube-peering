@@ -3,7 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/kube-peering/internal/pkg/transit"
+	"github.com/kube-peering/internal/pkg"
+	"github.com/kube-peering/internal/pkg/tunnel"
 
 	example "github.com/kube-peering/example"
 )
@@ -17,13 +18,13 @@ func main() {
 
 func server() {
 	_, port := tunnelPorts()
-	tunnel := transit.NewTunnelServer("tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
+	tunnel := tunnel.NewTunnelServer("tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
 	if port == 0 {
-		fowarder := transit.NewFowarder("tcp", ":8080")
+		fowarder := pkg.NewFowarder("tcp", ":8080")
 		tunnel.SetOnTCPTunnelIn(fowarder.ForwardTls)
 	} else {
-		interceptor := transit.NewInterceptor("tcp", port)
+		interceptor := pkg.NewInterceptor("tcp", port)
 		interceptor.OnTCPConnected = tunnel.TunnelTCPOut
 		go interceptor.Start()
 	}
@@ -33,13 +34,13 @@ func server() {
 
 func client() {
 	port, _ := tunnelPorts()
-	tunnel := transit.NewTunnelClient("tcp", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
+	tunnel := tunnel.NewTunnelClient("tcp", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
 
 	if port == 0 {
-		fowarder := transit.NewFowarder("tcp", ":8080")
+		fowarder := pkg.NewFowarder("tcp", ":8080")
 		tunnel.SetOnTCPTunnelIn(fowarder.ForwardTls)
 	} else {
-		interceptor := transit.NewInterceptor("tcp", port)
+		interceptor := pkg.NewInterceptor("tcp", port)
 		interceptor.OnTCPConnected = tunnel.TunnelTCPOut
 		go interceptor.Start()
 	}

@@ -3,12 +3,12 @@ package main
 import (
 	"net"
 
-	"github.com/kube-peering/internal/pkg/transit"
+	"github.com/kube-peering/internal/pkg"
 )
 
 func main() {
-	interceptor := transit.NewInterceptor("tcp", 10021)
-	forwarder := transit.NewFowarder("tcp", ":8080")
+	interceptor := pkg.NewInterceptor("tcp", 10021)
+	forwarder := pkg.NewFowarder("tcp", ":8080")
 	interceptor.OnTCPConnected = func(conn *net.TCPConn) {
 		forwarder.ForwardTCP(conn)
 	}

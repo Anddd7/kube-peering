@@ -1,10 +1,11 @@
-package transit
+package tunnel
 
 import (
 	"context"
 	"crypto/tls"
 	"net/http"
 
+	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
 	"go.uber.org/zap"
@@ -24,7 +25,7 @@ type TunnelServer struct {
 	onHttpTunnelIn http.HandlerFunc
 }
 
-func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) Tunnel {
+func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) pkg.Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"mode", "server",

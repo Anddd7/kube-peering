@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/kube-peering/internal/pkg/transit"
+	"github.com/kube-peering/internal/pkg"
 )
 
 func main() {
@@ -15,16 +15,16 @@ func main() {
 }
 
 func tcp() {
-	interceptor := transit.NewInterceptor("tcp", 10021)
-	forwarder := transit.NewFowarder("tcp", ":8080")
+	interceptor := pkg.NewInterceptor("tcp", 10021)
+	forwarder := pkg.NewFowarder("tcp", ":8080")
 	interceptor.OnTCPConnected = forwarder.ForwardTCP
 
 	interceptor.Start()
 }
 
 func http() {
-	interceptor := transit.NewInterceptor("http", 10021)
-	forwarder := transit.NewFowarder("http", "http://localhost:8080")
+	interceptor := pkg.NewInterceptor("http", 10021)
+	forwarder := pkg.NewFowarder("http", "http://localhost:8080")
 	interceptor.OnHTTPConnected = forwarder.ForwardHttp
 	interceptor.Start()
 }

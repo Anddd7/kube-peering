@@ -1,10 +1,12 @@
-package transit
+package tunnel
 
 import (
 	"crypto/tls"
 	"fmt"
 	"net"
 	"time"
+
+	"github.com/kube-peering/internal/pkg"
 )
 
 func (t *TunnelServer) startTCP() {
@@ -55,7 +57,7 @@ func (t *TunnelServer) TunnelTCPOut(from *net.TCPConn) {
 		return
 	}
 
-	Pipe(t.logger, from, t.tlsConn)
+	pkg.Pipe(t.logger, from, t.tlsConn)
 }
 
 func (t *TunnelServer) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {
