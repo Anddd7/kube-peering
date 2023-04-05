@@ -13,10 +13,10 @@ func (t *TunnelClient) startHTTP() {
 	// send back the response similar like the request
 }
 
-func (t *TunnelClient) TunnelHTTPOut(w http.ResponseWriter, r *http.Request) {
+func (t *TunnelClient) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
 	// TODO
 }
 
-func (t *TunnelClient) SetOnHTTPTunnelIn(fn http.HandlerFunc) {
-	t.onHTTPTunnelIn = fn
+func (t *TunnelClient) SetOnHTTPTunnel(fn http.HandlerFunc) {
+	t.onHTTPTunnel = fn
 }

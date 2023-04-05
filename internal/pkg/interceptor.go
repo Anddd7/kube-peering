@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/kube-peering/internal/pkg/logger"
+	"github.com/kube-peering/internal/pkg/util"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 )
@@ -16,7 +17,7 @@ type Interceptor struct {
 	logger          *zap.SugaredLogger
 	protocol        string
 	port            int
-	OnTCPConnected  func(conn *net.TCPConn)
+	OnTCPConnected  func(conn util.PipeConn)
 	OnHTTPConnected http.HandlerFunc
 }
 
@@ -48,7 +49,7 @@ func (t *Interceptor) Start() {
 	}
 }
 
-func (t *Interceptor) startTCP(onConnected func(conn *net.TCPConn)) {
+func (t *Interceptor) startTCP(onConnected func(conn util.PipeConn)) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
 	if err != nil {
 		t.logger.Panicln(err)

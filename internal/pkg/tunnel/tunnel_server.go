@@ -8,21 +8,22 @@ import (
 	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
+	"github.com/kube-peering/internal/pkg/util"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 )
 
 // TunnelServer is a server that listens for incoming tunnel connections
 type TunnelServer struct {
-	ctx            context.Context
-	logger         *zap.SugaredLogger
-	protocol       string
-	port           int
-	tlsConfig      *tls.Config
-	tlsConn        *tls.Conn
-	onTCPTunnelIn  func(conn *tls.Conn)
-	clientConn     *http2.ClientConn
-	onHTTPTunnelIn http.HandlerFunc
+	ctx          context.Context
+	logger       *zap.SugaredLogger
+	protocol     string
+	port         int
+	tlsConfig    *tls.Config
+	tlsConn      *tls.Conn
+	onTCPTunnel  func(conn util.PipeConn)
+	clientConn   *http2.ClientConn
+	onHTTPTunnel http.HandlerFunc
 }
 
 func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) pkg.Tunnel {

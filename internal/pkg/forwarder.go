@@ -36,7 +36,7 @@ func NewFowarder(protocol string, remoteAddr string) *Forwarder {
 	}
 }
 
-func (t *Forwarder) ForwardTCP(from *net.TCPConn) {
+func (t *Forwarder) ForwardTCP(from util.PipeConn) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", t.remoteAddr)
 	if err != nil {
 		t.logger.Panicln(err)

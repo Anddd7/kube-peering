@@ -1,17 +1,17 @@
 package pkg
 
 import (
-	"crypto/tls"
-	"net"
 	"net/http"
+
+	"github.com/kube-peering/internal/pkg/util"
 )
 
 type Tunnel interface {
 	Start()
 
-	SetOnTCPTunnelIn(func(conn *tls.Conn))
-	TunnelTCPOut(from *net.TCPConn)
+	SetOnTCPTunnel(func(conn util.PipeConn))
+	TunnelTCP(from util.PipeConn)
 
-	SetOnHTTPTunnelIn(http.HandlerFunc)
-	TunnelHTTPOut(w http.ResponseWriter, r *http.Request)
+	SetOnHTTPTunnel(http.HandlerFunc)
+	TunnelHTTP(w http.ResponseWriter, r *http.Request)
 }

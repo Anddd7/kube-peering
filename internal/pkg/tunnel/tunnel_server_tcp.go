@@ -35,14 +35,14 @@ func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	t.logger.Infof("new connection from %s", conn.RemoteAddr().String())
 
 	t.tlsConn = tls.Server(conn, t.tlsConfig)
-	if t.onTCPTunnelIn != nil {
+	if t.onTCPTunnel != nil {
 		t.logger.Infof("running tcp tunnel with %s, wait for data ...", conn.RemoteAddr().String())
 
-		t.onTCPTunnelIn(t.tlsConn)
+		t.onTCPTunnel(t.tlsConn)
 	}
 }
 
-func (t *TunnelServer) TunnelTCPOut(from *net.TCPConn) {
+func (t *TunnelServer) TunnelTCP(from util.PipeConn) {
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
 			break
@@ -59,6 +59,6 @@ func (t *TunnelServer) TunnelTCPOut(from *net.TCPConn) {
 	util.Pipe(t.logger, from, t.tlsConn)
 }
 
-func (t *TunnelServer) SetOnTCPTunnelIn(fn func(conn *tls.Conn)) {
-	t.onTCPTunnelIn = fn
+func (t *TunnelServer) SetOnTCPTunnel(fn func(conn util.PipeConn)) {
+	t.onTCPTunnel = fn
 }

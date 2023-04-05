@@ -45,9 +45,11 @@ func createLogger(debugMode bool, logEncoder string) *zap.SugaredLogger {
 func CreateLocalLogger() *zap.SugaredLogger {
 	return createLogger(true, "plain")
 }
+
 func CreateDevLogger() *zap.SugaredLogger {
 	return createLogger(true, "json")
 }
+
 func CreateProdLogger() *zap.SugaredLogger {
 	return createLogger(false, "json")
 }
