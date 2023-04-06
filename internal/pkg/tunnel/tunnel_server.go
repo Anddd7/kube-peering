@@ -8,7 +8,6 @@ import (
 	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
-	"github.com/kube-peering/internal/pkg/util"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 )
@@ -20,14 +19,14 @@ type tunnelServer struct {
 	protocol     pkg.Protocol
 	port         int
 	tlsConfig    *tls.Config
-	mode         TunnelMode
+	mode         pkg.TunnelMode
 	tlsConn      *tls.Conn
-	onTCPTunnel  func(conn util.PipeConn)
+	onTCPTunnel  func(conn pkg.PipeConn)
 	clientConn   *http2.ClientConn
 	onHTTPTunnel http.HandlerFunc
 }
 
-func NewTunnelServer(mode TunnelMode, protocol pkg.Protocol, port int, serverCertPath, serverKeyPath, serverName string) Tunnel {
+func NewTunnelServer(mode pkg.TunnelMode, protocol pkg.Protocol, port int, serverCertPath, serverKeyPath, serverName string) pkg.Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"type", "server",
@@ -56,4 +55,18 @@ func (t *tunnelServer) Start() {
 	case pkg.HTTP:
 		t.startHTTP()
 	}
+}
+
+func pushTunnelHeaders(req *http.Request, host string) {
+	req.Header.Set("X-Forwarded-Host", host)
+}
+
+func popTunnelHeaders(req *http.Request) string {
+	host := req.Header.Get("X-Forwarded-Host")
+
+	defer func(r *http.Request) {
+		r.Header.Del("X-Forwarded-Host")
+	}(req)
+
+	return host
 }

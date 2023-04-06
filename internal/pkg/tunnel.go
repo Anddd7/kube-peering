@@ -1,16 +1,14 @@
-package tunnel
+package pkg
 
 import (
 	"net/http"
-
-	"github.com/kube-peering/internal/pkg/util"
 )
 
 type Tunnel interface {
 	Start()
 
-	SetOnTCPTunnel(func(conn util.PipeConn))
-	TunnelTCP(from util.PipeConn)
+	SetOnTCPTunnel(func(conn PipeConn))
+	TunnelTCP(from PipeConn)
 
 	SetOnHTTPTunnel(http.HandlerFunc)
 	TunnelHTTP(w http.ResponseWriter, r *http.Request)
@@ -36,16 +34,11 @@ func (t TunnelMode) String() string {
 	}
 }
 
-func pushTunnelHeaders(req *http.Request, host string) {
-	req.Header.Set("X-Forwarded-Host", host)
-}
-
-func popTunnelHeaders(req *http.Request) string {
-	host := req.Header.Get("X-Forwarded-Host")
-
-	defer func(r *http.Request) {
-		r.Header.Del("X-Forwarded-Host")
-	}(req)
-
-	return host
+type TunnelConfig struct {
+	Port           int
+	Host           string
+	ServerCertPath string
+	ServerKeyPath  string
+	CaCertPath     string
+	ServerName     string
 }

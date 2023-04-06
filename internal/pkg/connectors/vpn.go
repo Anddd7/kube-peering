@@ -8,30 +8,21 @@ import (
 )
 
 type VPNConfig struct {
-	Tunnel     TunnelConfig
+	Tunnel     pkg.TunnelConfig
 	Protocol   pkg.Protocol
 	LocalPort  int
 	RemoteAddr string
 }
 
-type TunnelConfig struct {
-	Port           int
-	Host           string
-	ServerCertPath string
-	ServerKeyPath  string
-	CaCertPath     string
-	ServerName     string
-}
-
 type VPNServer struct {
 	Protocol  pkg.Protocol
 	Forwarder *pkg.Forwarder
-	Tunnel    tunnel.Tunnel
+	Tunnel    pkg.Tunnel
 }
 
 func NewVPNServer(cfg VPNConfig) *VPNServer {
 	_tunnel := tunnel.NewTunnelServer(
-		tunnel.Forward,
+		pkg.Forward,
 		cfg.Protocol, cfg.Tunnel.Port,
 		cfg.Tunnel.ServerCertPath, cfg.Tunnel.ServerKeyPath, cfg.Tunnel.ServerName,
 	)
@@ -54,13 +45,13 @@ func (s *VPNServer) Start() {
 type VPNClient struct {
 	Protocol    pkg.Protocol
 	Interceptor *pkg.Interceptor
-	Tunnel      tunnel.Tunnel
+	Tunnel      pkg.Tunnel
 }
 
 func NewVPNClient(cfg VPNConfig) *VPNClient {
 	interceptor := pkg.NewInterceptor(cfg.Protocol, cfg.LocalPort)
 	_tunnel := tunnel.NewTunnelClient(
-		tunnel.Forward,
+		pkg.Forward,
 		cfg.Protocol, fmt.Sprintf("%s:%d", cfg.Tunnel.Host, cfg.Tunnel.Port),
 		cfg.Tunnel.CaCertPath, cfg.Tunnel.ServerName,
 	)

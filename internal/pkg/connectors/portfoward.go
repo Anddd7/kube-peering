@@ -12,7 +12,7 @@ import (
 type PortForwardServer struct {
 	Protocol    pkg.Protocol
 	Interceptor *pkg.Interceptor
-	Tunnel      tunnel.Tunnel
+	Tunnel      pkg.Tunnel
 }
 
 func NewPortFowardServer(cfg VPNConfig) *PortForwardServer {
@@ -20,7 +20,7 @@ func NewPortFowardServer(cfg VPNConfig) *PortForwardServer {
 
 	interceptor := pkg.NewInterceptor(cfg.Protocol, remotePort)
 	_tunnel := tunnel.NewTunnelServer(
-		tunnel.Reverse,
+		pkg.Reverse,
 		cfg.Protocol, cfg.Tunnel.Port,
 		cfg.Tunnel.ServerCertPath, cfg.Tunnel.ServerKeyPath, cfg.Tunnel.ServerName,
 	)
@@ -44,14 +44,14 @@ func (s *PortForwardServer) Start() {
 type PortForwardClient struct {
 	Protocol  pkg.Protocol
 	Forwarder *pkg.Forwarder
-	Tunnel    tunnel.Tunnel
+	Tunnel    pkg.Tunnel
 }
 
 func NewPortForwardClient(cfg VPNConfig) *PortForwardClient {
 	localAddr := fmt.Sprintf("localhost:%d", cfg.LocalPort)
 
 	_tunnel := tunnel.NewTunnelClient(
-		tunnel.Forward,
+		pkg.Forward,
 		cfg.Protocol, fmt.Sprintf("%s:%d", cfg.Tunnel.Host, cfg.Tunnel.Port),
 		cfg.Tunnel.CaCertPath, cfg.Tunnel.ServerName,
 	)

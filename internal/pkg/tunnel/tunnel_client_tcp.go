@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"time"
 
-	"github.com/kube-peering/internal/pkg/util"
+	"github.com/kube-peering/internal/pkg"
 )
 
 func (t *tunnelClient) startTCP() {
@@ -21,7 +21,7 @@ func (t *tunnelClient) startTCP() {
 	}
 }
 
-func (t *tunnelClient) TunnelTCP(from util.PipeConn) {
+func (t *tunnelClient) TunnelTCP(from pkg.PipeConn) {
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
 			break
@@ -35,9 +35,9 @@ func (t *tunnelClient) TunnelTCP(from util.PipeConn) {
 		return
 	}
 
-	util.Pipe(t.logger, from, t.tlsConn)
+	pkg.Pipe(t.logger, from, t.tlsConn)
 }
 
-func (t *tunnelClient) SetOnTCPTunnel(fn func(conn util.PipeConn)) {
+func (t *tunnelClient) SetOnTCPTunnel(fn func(conn pkg.PipeConn)) {
 	t.onTCPTunnel = fn
 }

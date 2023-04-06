@@ -8,7 +8,6 @@ import (
 	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
-	"github.com/kube-peering/internal/pkg/util"
 	"go.uber.org/zap"
 )
 
@@ -19,14 +18,14 @@ type tunnelClient struct {
 	protocol     pkg.Protocol
 	remoteAddr   string
 	tlsConfig    *tls.Config
-	mode         TunnelMode
+	mode         pkg.TunnelMode
 	tlsConn      *tls.Conn
-	onTCPTunnel  func(conn util.PipeConn)
+	onTCPTunnel  func(conn pkg.PipeConn)
 	httpClient   *http.Client
 	onHTTPTunnel http.HandlerFunc
 }
 
-func NewTunnelClient(mode TunnelMode, protocol pkg.Protocol, remoteAddr, caCertPath, serverName string) Tunnel {
+func NewTunnelClient(mode pkg.TunnelMode, protocol pkg.Protocol, remoteAddr, caCertPath, serverName string) pkg.Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"type", "client",

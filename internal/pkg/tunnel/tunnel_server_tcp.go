@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/kube-peering/internal/pkg/util"
+	"github.com/kube-peering/internal/pkg"
 )
 
 func (t *tunnelServer) startTCP() {
@@ -42,7 +42,7 @@ func (t *tunnelServer) newConnection(conn *net.TCPConn) {
 	}
 }
 
-func (t *tunnelServer) TunnelTCP(from util.PipeConn) {
+func (t *tunnelServer) TunnelTCP(from pkg.PipeConn) {
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
 			break
@@ -56,9 +56,9 @@ func (t *tunnelServer) TunnelTCP(from util.PipeConn) {
 		return
 	}
 
-	util.Pipe(t.logger, from, t.tlsConn)
+	pkg.Pipe(t.logger, from, t.tlsConn)
 }
 
-func (t *tunnelServer) SetOnTCPTunnel(fn func(conn util.PipeConn)) {
+func (t *tunnelServer) SetOnTCPTunnel(fn func(conn pkg.PipeConn)) {
 	t.onTCPTunnel = fn
 }

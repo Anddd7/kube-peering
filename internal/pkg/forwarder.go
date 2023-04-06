@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/kube-peering/internal/pkg/logger"
-	"github.com/kube-peering/internal/pkg/util"
 	"go.uber.org/zap"
 )
 
@@ -37,7 +36,7 @@ func NewForwarder(protocol Protocol, remoteAddr string) *Forwarder {
 	}
 }
 
-func (t *Forwarder) ForwardTCP(from util.PipeConn) {
+func (t *Forwarder) ForwardTCP(from PipeConn) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", t.remoteAddr)
 	if err != nil {
 		t.logger.Panicln(err)
@@ -48,7 +47,7 @@ func (t *Forwarder) ForwardTCP(from util.PipeConn) {
 		t.logger.Panicln(err)
 	}
 
-	util.Pipe(t.logger, from, to)
+	Pipe(t.logger, from, to)
 }
 
 func (t *Forwarder) initReverseProxy() {
