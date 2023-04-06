@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
 	"os"
 
 	example "github.com/kube-peering/example"
@@ -23,22 +21,7 @@ func server() {
 
 	if port == 0 {
 		fowarder := pkg.NewFowarder("http", "localhost:8080")
-		tunnel.SetOnHTTPTunnel(func(w http.ResponseWriter, r *http.Request) {
-			method := r.Header.Get("X-Forwarded-Method")
-			path := r.Header.Get("X-Forwarded-Path")
-			url := "http://localhost:8080"
-
-			req, _ := http.NewRequest(
-				method,
-				fmt.Sprintf("%s%s", url, path),
-				r.Body,
-			)
-			req.Header = r.Header.Clone()
-
-			fmt.Printf("content length: %d", req.ContentLength)
-
-			fowarder.ForwardHTTP(w, req)
-		})
+		tunnel.SetOnHTTPTunnel(fowarder.ForwardHTTP)
 	} else {
 		// interceptor := pkg.NewInterceptor("tcp", port)
 		// interceptor.OnHTTPConnected = tunnel.TunnelHTTPOut

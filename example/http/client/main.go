@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	concurrency = 1
+	concurrency = 11
 )
 
 func main() {
