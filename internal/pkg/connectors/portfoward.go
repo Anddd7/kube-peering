@@ -1,6 +1,10 @@
 package connectors
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/tunnel"
 )
@@ -11,15 +15,20 @@ type PortForwardServer struct {
 	Tunnel      tunnel.Tunnel
 }
 
-func NewPortFowardServer(protocol pkg.Protocol, tunnelPort int, localPort int, serverCertPath, serverKeyPath, serverName string) *PortForwardServer {
-	interceptor := pkg.NewInterceptor(protocol, localPort)
-	_tunnel := tunnel.NewTunnelServer(tunnel.Reverse, protocol, tunnelPort, serverCertPath, serverKeyPath, serverName)
+func NewPortFowardServer(cfg VPNConfig) *PortForwardServer {
+	remotePort, _ := strconv.Atoi(strings.Split(cfg.RemoteAddr, ":")[1])
 
+	interceptor := pkg.NewInterceptor(cfg.Protocol, remotePort)
+	_tunnel := tunnel.NewTunnelServer(
+		tunnel.Reverse,
+		cfg.Protocol, cfg.Tunnel.Port,
+		cfg.Tunnel.ServerCertPath, cfg.Tunnel.ServerKeyPath, cfg.Tunnel.ServerName,
+	)
 	interceptor.OnTCPConnected = _tunnel.TunnelTCP
 	interceptor.OnHTTPConnected = _tunnel.TunnelHTTP
 
 	return &PortForwardServer{
-		Protocol:    protocol,
+		Protocol:    cfg.Protocol,
 		Interceptor: interceptor,
 		Tunnel:      _tunnel,
 	}
@@ -38,15 +47,21 @@ type PortForwardClient struct {
 	Tunnel    tunnel.Tunnel
 }
 
-func NewPortForwardClient(protocol pkg.Protocol, tunnelAddr string, localAddr string, caCertPath string, serverName string) *PortForwardClient {
-	_tunnel := tunnel.NewTunnelClient(tunnel.Forward, protocol, tunnelAddr, caCertPath, serverName)
-	forwarder := pkg.NewForwarder(protocol, localAddr)
+func NewPortForwardClient(cfg VPNConfig) *PortForwardClient {
+	localAddr := fmt.Sprintf("localhost:%d", cfg.LocalPort)
+
+	_tunnel := tunnel.NewTunnelClient(
+		tunnel.Forward,
+		cfg.Protocol, fmt.Sprintf("%s:%d", cfg.Tunnel.Host, cfg.Tunnel.Port),
+		cfg.Tunnel.CaCertPath, cfg.Tunnel.ServerName,
+	)
+	forwarder := pkg.NewForwarder(cfg.Protocol, localAddr)
 
 	_tunnel.SetOnTCPTunnel(forwarder.ForwardTCP)
 	_tunnel.SetOnHTTPTunnel(forwarder.ForwardHTTP)
 
 	return &PortForwardClient{
-		Protocol:  protocol,
+		Protocol:  cfg.Protocol,
 		Forwarder: forwarder,
 		Tunnel:    _tunnel,
 	}

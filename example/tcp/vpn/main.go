@@ -4,14 +4,27 @@ import (
 	"os"
 
 	"github.com/kube-peering/internal/pkg"
+	"github.com/kube-peering/internal/pkg/connectors"
 	"github.com/kube-peering/internal/pkg/tunnel"
 
 	example "github.com/kube-peering/example"
 )
 
 var (
-	mode     tunnel.TunnelMode
-	protocol = "tcp"
+	mode tunnel.TunnelMode
+	cfg  = connectors.VPNConfig{
+		Protocol:   pkg.TCP,
+		LocalPort:  example.VPNPort,
+		RemoteAddr: example.AppAddr,
+		Tunnel: connectors.TunnelConfig{
+			Port:           example.TunnelPort,
+			Host:           example.TunnelAddr,
+			ServerCertPath: example.TunnelServerCert,
+			ServerKeyPath:  example.TunnelServerKey,
+			CaCertPath:     example.TunnelCaCert,
+			ServerName:     example.TunnelServerName,
+		},
+	}
 )
 
 func init() {
@@ -31,35 +44,21 @@ func main() {
 }
 
 func server() {
-	server := tunnel.NewTunnelServer(mode, protocol, example.TunnelPort, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
-
 	if mode == tunnel.Forward {
-		fowarder := pkg.NewForwarder(protocol, example.AppAddr)
-		server.SetOnTCPTunnel(fowarder.ForwardTCP)
+		connectors.NewVPNServer(cfg).Start()
 	}
 
 	if mode == tunnel.Reverse {
-		interceptor := pkg.NewInterceptor(protocol, example.VPNPort)
-		interceptor.OnTCPConnected = server.TunnelTCP
-		go interceptor.Start()
+		connectors.NewPortFowardServer(cfg).Start()
 	}
-
-	go server.Start()
 }
 
 func client() {
-	client := tunnel.NewTunnelClient(mode, protocol, example.TunnelAddr, example.TunnelCaCert, example.TunnelServerName)
-
 	if mode == tunnel.Forward {
-		interceptor := pkg.NewInterceptor(protocol, example.VPNPort)
-		interceptor.OnTCPConnected = client.TunnelTCP
-		go interceptor.Start()
+		connectors.NewPortFowardServer(cfg).Start()
 	}
 
 	if mode == tunnel.Reverse {
-		fowarder := pkg.NewForwarder(protocol, example.AppAddr)
-		client.SetOnTCPTunnel(fowarder.ForwardTCP)
+		connectors.NewPortForwardClient(cfg).Start()
 	}
-
-	go client.Start()
 }
