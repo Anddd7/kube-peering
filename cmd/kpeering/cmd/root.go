@@ -7,9 +7,7 @@ import (
 	"os"
 
 	"github.com/kube-peering/internal/pkg/config"
-	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 var rootCmd = &cobra.Command{
@@ -21,7 +19,6 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		logger.Z.Error(`failed to execute command`, zap.Error(err))
 		os.Exit(1)
 	}
 }

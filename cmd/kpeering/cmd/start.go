@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/kube-peering/internal/kpeering"
-	"github.com/kube-peering/internal/pkg/config"
+	"github.com/kube-peering/internal/pkg"
+	"github.com/kube-peering/internal/pkg/connectors"
 	"github.com/kube-peering/internal/pkg/logger"
-	"github.com/kube-peering/internal/pkg/model"
 	"github.com/spf13/cobra"
 )
 
@@ -13,19 +15,24 @@ var instance *kpeering.Kpeering
 var startCmd = &cobra.Command{
 	Use: "start",
 	PreRun: func(cmd *cobra.Command, args []string) {
-		logger.InitLogger(config.DebugMode, config.LogEncoder)
-		protocol := "tcp"
-		if flags.http {
-			protocol = "http"
-		}
+		_logger := logger.CreateLocalLogger().With(
+			"cmd", "kpeering start",
+		)
+
 		instance = &kpeering.Kpeering{
-			Interceptor: model.CreateInterceptor(protocol, flags.port),
-			Tunnel: model.CreateTunnelServer(
-				"localhost", 10022,
-				"../../bin/server.key",
-				"../../bin/server.crt",
-				"localhost",
-			),
+			Logger: _logger,
+			VPNConfig: connectors.VPNConfig{
+				Protocol: pkg.Protocol(flags.protocol),
+				// LocalPort:  flags.port,
+				RemoteAddr: fmt.Sprintf("localhost:%d", flags.port),
+				Tunnel: pkg.TunnelConfig{
+					Host:           "localhost",
+					Port:           flags.tunnelPort,
+					ServerCertPath: flags.tunnelServerCert,
+					ServerKeyPath:  flags.tunnelServerKey,
+					ServerName:     flags.tunnelServerName,
+				},
+			},
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,19 +41,20 @@ var startCmd = &cobra.Command{
 }
 
 var flags = struct {
-	tcp  bool
-	http bool
-	port int
+	protocol         string
+	tunnelPort       int
+	tunnelServerCert string
+	tunnelServerKey  string
+	tunnelServerName string
+	port             int
 }{}
 
-//lintignore:errorcheck
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().BoolVar(&flags.tcp, "tcp", true, "build a tcp tunnel")
-	startCmd.Flags().BoolVar(&flags.http, "http", false, "build a http tunnel")
-	startCmd.Flags().IntVarP(&flags.port, "port", "p", 0, "the listening port")
-	err := startCmd.MarkFlagRequired("port")
-	if err != nil {
-		panic(err)
-	}
+	startCmd.Flags().StringVar(&flags.protocol, "protocol", "tcp", "the protocol of peer connection")
+	startCmd.Flags().IntVar(&flags.tunnelPort, "tunnel-port", 10022, "the tunnel server port")
+	startCmd.Flags().StringVar(&flags.tunnelServerCert, "tunnel-server-cert", "../../bin/server.crt", "the server cert of tunnel server")
+	startCmd.Flags().StringVar(&flags.tunnelServerKey, "tunnel-server-key", "../../bin/server.key", "the server key of tunnel server")
+	startCmd.Flags().StringVar(&flags.tunnelServerName, "tunnel-server-name", "localhost", "the tunnel server nam in cert")
+	startCmd.Flags().IntVarP(&flags.port, "port", "p", 8080, "the port of application running remotely")
 }
