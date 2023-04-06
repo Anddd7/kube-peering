@@ -16,7 +16,7 @@ func main() {
 
 func tcp() {
 	interceptor := pkg.NewInterceptor("tcp", 10021)
-	forwarder := pkg.NewFowarder("tcp", ":8443")
+	forwarder := pkg.NewForwarder("tcp", ":8443")
 	interceptor.OnTCPConnected = forwarder.ForwardTCP
 
 	interceptor.Start()
@@ -25,7 +25,7 @@ func tcp() {
 // not working, http interceptor cannot accept https request
 func http() {
 	interceptor := pkg.NewInterceptor("http", 10021)
-	forwarder := pkg.NewFowarder("http", "https://localhost:8443")
+	forwarder := pkg.NewForwarder("http", "https://localhost:8443")
 	interceptor.OnHTTPConnected = forwarder.ForwardHTTP
 	interceptor.Start()
 }

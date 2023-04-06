@@ -36,7 +36,7 @@ func server() {
 	server := tunnel.NewTunnelServer(mode, protocol, example.TunnelPort, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
 	if mode == tunnel.Forward {
-		fowarder := pkg.NewFowarder(protocol, example.AppAddr)
+		fowarder := pkg.NewForwarder(protocol, example.AppAddr)
 		server.SetOnHTTPTunnel(fowarder.ForwardHTTP)
 	}
 
@@ -59,7 +59,7 @@ func client() {
 	}
 
 	if mode == tunnel.Reverse {
-		fowarder := pkg.NewFowarder(protocol, example.AppAddr)
+		fowarder := pkg.NewForwarder(protocol, example.AppAddr)
 		client.SetOnHTTPTunnel(fowarder.ForwardHTTP)
 	}
 

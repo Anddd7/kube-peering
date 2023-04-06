@@ -18,7 +18,7 @@ func main() {
 
 func tcp() {
 	interceptor := pkg.NewInterceptor("tcp", example.ProxyPort)
-	forwarder := pkg.NewFowarder("tcp", example.AppAddr)
+	forwarder := pkg.NewForwarder("tcp", example.AppAddr)
 	interceptor.OnTCPConnected = forwarder.ForwardTCP
 
 	interceptor.Start()
@@ -26,7 +26,7 @@ func tcp() {
 
 func http() {
 	interceptor := pkg.NewInterceptor("http", example.ProxyPort)
-	forwarder := pkg.NewFowarder("http", example.AppAddr)
+	forwarder := pkg.NewForwarder("http", example.AppAddr)
 	interceptor.OnHTTPConnected = forwarder.ForwardHTTP
 
 	interceptor.Start()

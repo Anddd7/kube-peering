@@ -7,7 +7,7 @@ import (
 
 func main() {
 	interceptor := pkg.NewInterceptor("tcp", example.ProxyPort)
-	forwarder := pkg.NewFowarder("tcp", example.AppAddr)
+	forwarder := pkg.NewForwarder("tcp", example.AppAddr)
 	interceptor.OnTCPConnected = forwarder.ForwardTCP
 
 	interceptor.Start()
