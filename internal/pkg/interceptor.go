@@ -15,13 +15,13 @@ import (
 type Interceptor struct {
 	ctx             context.Context
 	logger          *zap.SugaredLogger
-	protocol        string
+	protocol        Protocol
 	port            int
 	OnTCPConnected  func(conn util.PipeConn)
 	OnHTTPConnected http.HandlerFunc
 }
 
-func NewInterceptor(protocol string, port int) *Interceptor {
+func NewInterceptor(protocol Protocol, port int) *Interceptor {
 	return &Interceptor{
 		ctx: context.TODO(),
 		logger: logger.CreateLocalLogger().With(

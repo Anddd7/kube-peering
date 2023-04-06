@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
+	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/util"
@@ -16,7 +17,7 @@ import (
 type tunnelServer struct {
 	ctx          context.Context
 	logger       *zap.SugaredLogger
-	protocol     string
+	protocol     pkg.Protocol
 	port         int
 	tlsConfig    *tls.Config
 	mode         TunnelMode
@@ -26,7 +27,7 @@ type tunnelServer struct {
 	onHTTPTunnel http.HandlerFunc
 }
 
-func NewTunnelServer(mode TunnelMode, protocol string, port int, serverCertPath, serverKeyPath, serverName string) Tunnel {
+func NewTunnelServer(mode TunnelMode, protocol pkg.Protocol, port int, serverCertPath, serverKeyPath, serverName string) Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"type", "server",
@@ -49,10 +50,10 @@ func NewTunnelServer(mode TunnelMode, protocol string, port int, serverCertPath,
 }
 
 func (t *tunnelServer) Start() {
-	if t.protocol == "tcp" {
+	switch t.protocol {
+	case pkg.TCP:
 		t.startTCP()
-	}
-	if t.protocol == "http" {
+	case pkg.HTTP:
 		t.startHTTP()
 	}
 }

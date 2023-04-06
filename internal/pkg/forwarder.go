@@ -18,12 +18,12 @@ type Forwarder struct {
 	ctx          context.Context
 	logger       *zap.SugaredLogger
 	mutex        sync.Mutex
-	protocol     string
+	protocol     Protocol
 	remoteAddr   string
 	reverseProxy *httputil.ReverseProxy
 }
 
-func NewFowarder(protocol string, remoteAddr string) *Forwarder {
+func NewForwarder(protocol Protocol, remoteAddr string) *Forwarder {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "forwarder",
 		"protocol", protocol,
