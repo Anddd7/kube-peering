@@ -4,28 +4,16 @@ import (
 	"os"
 
 	"github.com/kube-peering/internal/pkg"
+	"github.com/kube-peering/internal/pkg/connectors"
+
+	example "github.com/kube-peering/example"
 )
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "http" {
-		http()
+		// not working, http interceptor cannot accept https request
+		connectors.NewProxy(pkg.HTTP, example.ProxyPort, example.AppHttpsAddr).Start()
 	} else {
-		tcp()
+		connectors.NewProxy(pkg.TCP, example.ProxyPort, example.AppHttpsAddr).Start()
 	}
-}
-
-func tcp() {
-	interceptor := pkg.NewInterceptor("tcp", 10021)
-	forwarder := pkg.NewForwarder("tcp", ":8443")
-	interceptor.OnTCPConnected = forwarder.ForwardTCP
-
-	interceptor.Start()
-}
-
-// not working, http interceptor cannot accept https request
-func http() {
-	interceptor := pkg.NewInterceptor("http", 10021)
-	forwarder := pkg.NewForwarder("http", "https://localhost:8443")
-	interceptor.OnHTTPConnected = forwarder.ForwardHTTP
-	interceptor.Start()
 }

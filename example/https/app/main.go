@@ -38,13 +38,11 @@ func pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	server := http.Server{
-		Addr:      ":8443",
+		Addr:      example.AppHttpsAddr,
 		TLSConfig: example.AppTlsConfig,
 	}
 
 	http.HandleFunc("/ping", pingHandlerFunc)
-
-	fmt.Println("Server listening at :8443 ...")
 
 	if err := server.ListenAndServeTLS("", ""); err != nil {
 		log.Fatal(err)

@@ -23,6 +23,9 @@ const (
 	AppPort = 8080
 	AppAddr = "localhost:8080"
 
+	AppHttpsPort = 8443
+	AppHttpsAddr = "localhost:8443"
+
 	TunnelPort = 10086
 	TunnelHost = "localhost"
 	TunnelAddr = "localhost:10086"

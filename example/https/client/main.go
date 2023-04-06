@@ -27,7 +27,7 @@ func main() {
 			AllowHTTP:          false,
 		},
 	}
-	url := fmt.Sprintf("https://localhost%s/ping", port())
+	url := fmt.Sprintf("https://localhost:%d/ping", port())
 	for i := 0; i < concurrency; i++ {
 		go func(index int) {
 			defer wg.Done()
@@ -51,9 +51,14 @@ func main() {
 	wg.Wait()
 }
 
-func port() string {
-	if len(os.Args) > 1 && os.Args[1] == "proxy" {
-		return ":10021"
+func port() int {
+	if len(os.Args) > 1 {
+		if os.Args[1] == "proxy" {
+			return example.ProxyPort
+		}
+		if os.Args[1] == "vpn" {
+			return example.VPNPort
+		}
 	}
-	return ":8443"
+	return example.AppHttpsPort
 }
