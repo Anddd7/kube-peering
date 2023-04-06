@@ -24,6 +24,7 @@ const (
 	AppAddr = "localhost:8080"
 
 	TunnelPort = 10086
+	TunnelHost = "localhost"
 	TunnelAddr = "localhost:10086"
 
 	ProxyPort = 10021

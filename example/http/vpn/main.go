@@ -17,7 +17,7 @@ var (
 		RemoteAddr: example.AppAddr,
 		Tunnel: connectors.TunnelConfig{
 			Port:           example.TunnelPort,
-			Host:           example.TunnelAddr,
+			Host:           example.TunnelHost,
 			ServerCertPath: example.TunnelServerCert,
 			ServerKeyPath:  example.TunnelServerKey,
 			CaCertPath:     example.TunnelCaCert,
@@ -39,8 +39,8 @@ func init() {
 // normal : client -> tunnel client --------> tunnel server -> server
 // reverse: client -> tunnel server --------> tunnel client -> server
 func main() {
-	server()
-	client()
+	go server()
+	go client()
 
 	select {}
 }
@@ -57,7 +57,7 @@ func server() {
 
 func client() {
 	if mode == tunnel.Forward {
-		connectors.NewPortFowardServer(cfg).Start()
+		connectors.NewVPNClient(cfg).Start()
 	}
 
 	if mode == tunnel.Reverse {

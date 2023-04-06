@@ -34,14 +34,14 @@ func NewInterceptor(protocol Protocol, port int) *Interceptor {
 }
 
 func (t *Interceptor) Start() {
-	if t.protocol == "tcp" {
+	if t.protocol == TCP {
 		if t.OnTCPConnected == nil {
 			t.logger.Panicln("OnTCPConnected is nil")
 		}
 		t.startTCP(t.OnTCPConnected)
 	}
 
-	if t.protocol == "http" {
+	if t.protocol == HTTP {
 		if t.OnHTTPConnected == nil {
 			t.logger.Panicln("OnHTTPConnected is nil")
 		}
