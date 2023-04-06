@@ -9,13 +9,13 @@ import (
 	"github.com/kube-peering/internal/pkg/tunnel"
 )
 
-type PortForwardServer struct {
+type ReverseVPNServer struct {
 	Protocol    pkg.Protocol
 	Interceptor *pkg.Interceptor
 	Tunnel      pkg.Tunnel
 }
 
-func NewPortFowardServer(cfg VPNConfig) *PortForwardServer {
+func NewReverseVPNServer(cfg VPNConfig) *ReverseVPNServer {
 	remotePort, _ := strconv.Atoi(strings.Split(cfg.RemoteAddr, ":")[1])
 
 	interceptor := pkg.NewInterceptor(cfg.Protocol, remotePort)
@@ -27,27 +27,27 @@ func NewPortFowardServer(cfg VPNConfig) *PortForwardServer {
 	interceptor.OnTCPConnected = _tunnel.TunnelTCP
 	interceptor.OnHTTPConnected = _tunnel.TunnelHTTP
 
-	return &PortForwardServer{
+	return &ReverseVPNServer{
 		Protocol:    cfg.Protocol,
 		Interceptor: interceptor,
 		Tunnel:      _tunnel,
 	}
 }
 
-func (s *PortForwardServer) Start() {
+func (s *ReverseVPNServer) Start() {
 	go s.Interceptor.Start()
 	go s.Tunnel.Start()
 
 	select {}
 }
 
-type PortForwardClient struct {
+type ReverseVPNClient struct {
 	Protocol  pkg.Protocol
 	Forwarder *pkg.Forwarder
 	Tunnel    pkg.Tunnel
 }
 
-func NewPortForwardClient(cfg VPNConfig) *PortForwardClient {
+func NewReverseVPNClient(cfg VPNConfig) *ReverseVPNClient {
 	localAddr := fmt.Sprintf("localhost:%d", cfg.LocalPort)
 
 	_tunnel := tunnel.NewTunnelClient(
@@ -60,13 +60,13 @@ func NewPortForwardClient(cfg VPNConfig) *PortForwardClient {
 	_tunnel.SetOnTCPTunnel(forwarder.ForwardTCP)
 	_tunnel.SetOnHTTPTunnel(forwarder.ForwardHTTP)
 
-	return &PortForwardClient{
+	return &ReverseVPNClient{
 		Protocol:  cfg.Protocol,
 		Forwarder: forwarder,
 		Tunnel:    _tunnel,
 	}
 }
 
-func (c *PortForwardClient) Start() {
+func (c *ReverseVPNClient) Start() {
 	c.Tunnel.Start()
 }

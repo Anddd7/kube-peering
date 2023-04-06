@@ -6,16 +6,15 @@ import (
 	example "github.com/kube-peering/example"
 	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/connectors"
-	"github.com/kube-peering/internal/pkg/tunnel"
 )
 
 var (
-	mode tunnel.TunnelMode
+	mode pkg.TunnelMode
 	cfg  = connectors.VPNConfig{
 		Protocol:   pkg.HTTP,
 		LocalPort:  example.VPNPort,
 		RemoteAddr: example.AppAddr,
-		Tunnel: connectors.TunnelConfig{
+		Tunnel: pkg.TunnelConfig{
 			Port:           example.TunnelPort,
 			Host:           example.TunnelHost,
 			ServerCertPath: example.TunnelServerCert,
@@ -29,10 +28,10 @@ var (
 func init() {
 	if len(os.Args) > 1 {
 		if os.Args[1] == "reverse" {
-			mode = tunnel.Reverse
+			mode = pkg.Reverse
 		}
 	}
-	mode = tunnel.Forward
+	mode = pkg.Forward
 }
 
 // client will connect to 10022
@@ -46,21 +45,21 @@ func main() {
 }
 
 func server() {
-	if mode == tunnel.Forward {
+	if mode == pkg.Forward {
 		connectors.NewVPNServer(cfg).Start()
 	}
 
-	if mode == tunnel.Reverse {
-		connectors.NewPortFowardServer(cfg).Start()
+	if mode == pkg.Reverse {
+		connectors.NewReverseVPNServer(cfg).Start()
 	}
 }
 
 func client() {
-	if mode == tunnel.Forward {
+	if mode == pkg.Forward {
 		connectors.NewVPNClient(cfg).Start()
 	}
 
-	if mode == tunnel.Reverse {
-		connectors.NewPortForwardClient(cfg).Start()
+	if mode == pkg.Reverse {
+		connectors.NewReverseVPNClient(cfg).Start()
 	}
 }
