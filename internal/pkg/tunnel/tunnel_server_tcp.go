@@ -24,7 +24,7 @@ func (t *TunnelServer) startTCP() {
 	for {
 		conn, err := listener.AcceptTCP()
 		if err != nil {
-			t.logger.Error("", err)
+			t.logger.Error(err)
 			continue
 		}
 		go t.newConnection(conn)

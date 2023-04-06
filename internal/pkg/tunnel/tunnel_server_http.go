@@ -38,7 +38,6 @@ func (t *TunnelServer) SetOnHTTPTunnel(fn http.HandlerFunc) {
 
 func pushTunnelHeaders(req *http.Request, host string) {
 	req.Header.Set("X-Forwarded-Host", host)
-
 }
 
 func popTunnelHeaders(req *http.Request) string {

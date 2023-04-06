@@ -31,13 +31,13 @@ func (t *TunnelClient) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := t.httpClient.Do(req)
 	if err != nil {
-		t.logger.Errorln(err)
+		t.logger.Error(err)
 		return
 	}
 
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
-		t.logger.Errorln(err)
+		t.logger.Error(err)
 	}
 }
 

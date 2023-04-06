@@ -64,7 +64,7 @@ func (t *Interceptor) startTCP(onConnected func(conn util.PipeConn)) {
 	for {
 		conn, err := listener.AcceptTCP()
 		if err != nil {
-			t.logger.Error("", err)
+			t.logger.Error(err)
 			continue
 		}
 		go onConnected(conn)
