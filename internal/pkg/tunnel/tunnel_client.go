@@ -12,7 +12,7 @@ import (
 )
 
 // TunnelClient is a client that connects to a tunnel server
-type TunnelClient struct {
+type tunnelClient struct {
 	ctx          context.Context
 	logger       *zap.SugaredLogger
 	protocol     string
@@ -37,7 +37,7 @@ func NewTunnelClient(mode TunnelMode, protocol, remoteAddr, caCertPath, serverNa
 		_logger.Panicln(err)
 	}
 
-	return &TunnelClient{
+	return &tunnelClient{
 		ctx:        context.TODO(),
 		logger:     _logger,
 		protocol:   protocol,
@@ -47,7 +47,7 @@ func NewTunnelClient(mode TunnelMode, protocol, remoteAddr, caCertPath, serverNa
 	}
 }
 
-func (t *TunnelClient) Start() {
+func (t *tunnelClient) Start() {
 	if t.protocol == "tcp" {
 		t.startTCP()
 	}

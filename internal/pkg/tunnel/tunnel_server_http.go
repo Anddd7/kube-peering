@@ -14,7 +14,7 @@ import (
 	"golang.org/x/net/http2"
 )
 
-func (t *TunnelServer) startHTTP() {
+func (t *tunnelServer) startHTTP() {
 	if t.mode == Forward {
 		server := http.Server{
 			Addr:      fmt.Sprintf(":%d", t.port),
@@ -60,7 +60,7 @@ func (t *TunnelServer) startHTTP() {
 	}
 }
 
-func (t *TunnelServer) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
+func (t *tunnelServer) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
 	req := t.tunnelRequest(r)
 	t.logger.Infof("tunnel request from [%s]%s to [%s]%s",
 		r.RemoteAddr, r.URL.Path,
@@ -79,7 +79,7 @@ func (t *TunnelServer) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TunnelServer) tunnelRequest(r *http.Request) *http.Request {
+func (t *tunnelServer) tunnelRequest(r *http.Request) *http.Request {
 	req := r.Clone(t.ctx)
 
 	// clientHost := "localhost" //conn.RemoteAddr().(*net.TCPAddr).IP.String()
@@ -97,7 +97,7 @@ func (t *TunnelServer) tunnelRequest(r *http.Request) *http.Request {
 	return req
 }
 
-func (t *TunnelServer) SetOnHTTPTunnel(fn http.HandlerFunc) {
+func (t *tunnelServer) SetOnHTTPTunnel(fn http.HandlerFunc) {
 	t.onHTTPTunnel = func(w http.ResponseWriter, r *http.Request) {
 		t.logger.Infof("on http tunnel %s => %s\n", r.RemoteAddr, r.URL.String())
 

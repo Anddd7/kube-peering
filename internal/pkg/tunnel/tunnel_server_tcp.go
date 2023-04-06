@@ -9,7 +9,7 @@ import (
 	"github.com/kube-peering/internal/pkg/util"
 )
 
-func (t *TunnelServer) startTCP() {
+func (t *tunnelServer) startTCP() {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
 	if err != nil {
 		t.logger.Panicln(err)
@@ -31,7 +31,7 @@ func (t *TunnelServer) startTCP() {
 	}
 }
 
-func (t *TunnelServer) newConnection(conn *net.TCPConn) {
+func (t *tunnelServer) newConnection(conn *net.TCPConn) {
 	t.logger.Infof("new connection from %s", conn.RemoteAddr().String())
 
 	t.tlsConn = tls.Server(conn, t.tlsConfig)
@@ -42,7 +42,7 @@ func (t *TunnelServer) newConnection(conn *net.TCPConn) {
 	}
 }
 
-func (t *TunnelServer) TunnelTCP(from util.PipeConn) {
+func (t *tunnelServer) TunnelTCP(from util.PipeConn) {
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
 			break
@@ -59,6 +59,6 @@ func (t *TunnelServer) TunnelTCP(from util.PipeConn) {
 	util.Pipe(t.logger, from, t.tlsConn)
 }
 
-func (t *TunnelServer) SetOnTCPTunnel(fn func(conn util.PipeConn)) {
+func (t *tunnelServer) SetOnTCPTunnel(fn func(conn util.PipeConn)) {
 	t.onTCPTunnel = fn
 }

@@ -13,7 +13,7 @@ import (
 )
 
 // TunnelServer is a server that listens for incoming tunnel connections
-type TunnelServer struct {
+type tunnelServer struct {
 	ctx          context.Context
 	logger       *zap.SugaredLogger
 	protocol     string
@@ -38,7 +38,7 @@ func NewTunnelServer(mode TunnelMode, protocol string, port int, serverCertPath,
 		_logger.Panicln(err)
 	}
 
-	return &TunnelServer{
+	return &tunnelServer{
 		ctx:       context.TODO(),
 		logger:    _logger,
 		protocol:  protocol,
@@ -48,7 +48,7 @@ func NewTunnelServer(mode TunnelMode, protocol string, port int, serverCertPath,
 	}
 }
 
-func (t *TunnelServer) Start() {
+func (t *tunnelServer) Start() {
 	if t.protocol == "tcp" {
 		t.startTCP()
 	}

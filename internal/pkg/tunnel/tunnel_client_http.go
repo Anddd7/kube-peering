@@ -9,7 +9,7 @@ import (
 	"golang.org/x/net/http2"
 )
 
-func (t *TunnelClient) startHTTP() {
+func (t *tunnelClient) startHTTP() {
 	if t.mode == Forward {
 		// http2 to multiplex multiple requests over a single connection
 		tr := &http2.Transport{
@@ -38,7 +38,7 @@ func (t *TunnelClient) startHTTP() {
 	}
 }
 
-func (t *TunnelClient) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
+func (t *tunnelClient) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
 	req := t.tunnelRequest(r)
 	t.logger.Infof("tunnel request from [%s]%s to [%s]%s",
 		r.RemoteAddr, r.URL.Path,
@@ -57,7 +57,7 @@ func (t *TunnelClient) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *TunnelClient) tunnelRequest(r *http.Request) *http.Request {
+func (t *tunnelClient) tunnelRequest(r *http.Request) *http.Request {
 	req := r.Clone(t.ctx)
 
 	// redirect to tunnel server
@@ -74,7 +74,7 @@ func (t *TunnelClient) tunnelRequest(r *http.Request) *http.Request {
 	return req
 }
 
-func (t *TunnelClient) SetOnHTTPTunnel(fn http.HandlerFunc) {
+func (t *tunnelClient) SetOnHTTPTunnel(fn http.HandlerFunc) {
 	t.onHTTPTunnel = func(w http.ResponseWriter, r *http.Request) {
 		t.logger.Infof("on http tunnel %s => %s\n", r.RemoteAddr, r.URL.String())
 

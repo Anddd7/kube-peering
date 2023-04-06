@@ -7,7 +7,7 @@ import (
 	"github.com/kube-peering/internal/pkg/util"
 )
 
-func (t *TunnelClient) startTCP() {
+func (t *tunnelClient) startTCP() {
 	conn, err := tls.Dial("tcp", t.remoteAddr, t.tlsConfig)
 	if err != nil {
 		t.logger.Errorf("failed to connect to %s: %v", t.remoteAddr, err)
@@ -21,7 +21,7 @@ func (t *TunnelClient) startTCP() {
 	}
 }
 
-func (t *TunnelClient) TunnelTCP(from util.PipeConn) {
+func (t *tunnelClient) TunnelTCP(from util.PipeConn) {
 	for i := 0; i < 3; i++ {
 		if t.tlsConn != nil {
 			break
@@ -38,6 +38,6 @@ func (t *TunnelClient) TunnelTCP(from util.PipeConn) {
 	util.Pipe(t.logger, from, t.tlsConn)
 }
 
-func (t *TunnelClient) SetOnTCPTunnel(fn func(conn util.PipeConn)) {
+func (t *tunnelClient) SetOnTCPTunnel(fn func(conn util.PipeConn)) {
 	t.onTCPTunnel = fn
 }
