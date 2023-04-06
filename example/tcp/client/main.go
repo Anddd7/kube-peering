@@ -6,10 +6,12 @@ import (
 	"io"
 	"net"
 	"os"
+
+	example "github.com/kube-peering/example"
 )
 
 func main() {
-	conn, err := net.Dial("tcp", port())
+	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%d", port()))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to connect to server: %v\n", err)
 		os.Exit(1)
@@ -31,14 +33,14 @@ func readServerMessage(conn io.Reader) {
 	}
 }
 
-func port() string {
+func port() int {
 	if len(os.Args) > 1 {
 		if os.Args[1] == "proxy" {
-			return ":10021"
+			return example.ProxyPort
 		}
 		if os.Args[1] == "vpn" {
-			return ":10022"
+			return example.VPNPort
 		}
 	}
-	return ":8080"
+	return example.AppPort
 }

@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/kube-peering/internal/pkg/util"
@@ -20,14 +19,14 @@ type TunnelServer struct {
 	protocol     string
 	port         int
 	tlsConfig    *tls.Config
-	mode         pkg.TunnelMode
+	mode         TunnelMode
 	tlsConn      *tls.Conn
 	onTCPTunnel  func(conn util.PipeConn)
 	clientConn   *http2.ClientConn
 	onHTTPTunnel http.HandlerFunc
 }
 
-func NewTunnelServer(mode pkg.TunnelMode, protocol string, port int, serverCertPath, serverKeyPath, serverName string) pkg.Tunnel {
+func NewTunnelServer(mode TunnelMode, protocol string, port int, serverCertPath, serverKeyPath, serverName string) Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"type", "server",

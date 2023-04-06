@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	example "github.com/kube-peering/example"
 )
 
 const (
@@ -18,7 +20,7 @@ func main() {
 	wg.Add(concurrency)
 
 	client := &http.Client{}
-	url := fmt.Sprintf("http://localhost%s/ping", port())
+	url := fmt.Sprintf("http://localhost:%d/ping", port())
 	for i := 0; i < concurrency; i++ {
 		go func(index int) {
 			defer wg.Done()
@@ -42,14 +44,14 @@ func main() {
 	wg.Wait()
 }
 
-func port() string {
+func port() int {
 	if len(os.Args) > 1 {
 		if os.Args[1] == "proxy" {
-			return ":10021"
+			return example.ProxyPort
 		}
 		if os.Args[1] == "vpn" {
-			return ":10022"
+			return example.VPNPort
 		}
 	}
-	return ":8080"
+	return example.AppPort
 }

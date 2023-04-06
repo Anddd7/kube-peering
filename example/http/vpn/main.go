@@ -8,6 +8,23 @@ import (
 	"github.com/kube-peering/internal/pkg/tunnel"
 )
 
+var (
+	mode     tunnel.TunnelMode
+	protocol = "http"
+)
+
+func init() {
+	if len(os.Args) > 1 {
+		if os.Args[1] == "reverse" {
+			mode = tunnel.Reverse
+		}
+	}
+	mode = tunnel.Forward
+}
+
+// client will connect to 10022
+// normal : client -> tunnel client --------> tunnel server -> server
+// reverse: client -> tunnel server --------> tunnel client -> server
 func main() {
 	server()
 	client()
@@ -16,51 +33,35 @@ func main() {
 }
 
 func server() {
-	_, port := tunnelPorts()
+	server := tunnel.NewTunnelServer(mode, protocol, example.TunnelPort, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
-	var t pkg.Tunnel
-	if port == 0 {
-		// vpn tunnel
-		t = tunnel.NewTunnelServer(pkg.Forward, "http", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
-		fowarder := pkg.NewFowarder("http", "localhost:8080")
-		t.SetOnHTTPTunnel(fowarder.ForwardHTTP)
-	} else {
-		// reverse tunnel
-		t = tunnel.NewTunnelServer(pkg.Reverse, "http", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
-		interceptor := pkg.NewInterceptor("http", port)
-		interceptor.OnHTTPConnected = t.TunnelHTTP
+	if mode == tunnel.Forward {
+		fowarder := pkg.NewFowarder(protocol, example.AppAddr)
+		server.SetOnHTTPTunnel(fowarder.ForwardHTTP)
+	}
+
+	if mode == tunnel.Reverse {
+		interceptor := pkg.NewInterceptor(protocol, example.VPNPort)
+		interceptor.OnHTTPConnected = server.TunnelHTTP
 		go interceptor.Start()
 	}
-	go t.Start()
+
+	go server.Start()
 }
 
 func client() {
-	port, _ := tunnelPorts()
+	client := tunnel.NewTunnelClient(mode, protocol, example.TunnelAddr, example.TunnelCaCert, example.TunnelServerName)
 
-	var t pkg.Tunnel
-	if port == 0 {
-		// reverse tunnel
-		t = tunnel.NewTunnelClient(pkg.Reverse, "http", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
-		fowarder := pkg.NewFowarder("http", "localhost:8080")
-		t.SetOnHTTPTunnel(fowarder.ForwardHTTP)
-	} else {
-		// vpn tunnel
-		t = tunnel.NewTunnelClient(pkg.Forward, "http", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
-		interceptor := pkg.NewInterceptor("http", port)
-		interceptor.OnHTTPConnected = t.TunnelHTTP
+	if mode == tunnel.Forward {
+		interceptor := pkg.NewInterceptor(protocol, example.VPNPort)
+		interceptor.OnHTTPConnected = client.TunnelHTTP
 		go interceptor.Start()
 	}
-	go t.Start()
-}
 
-// client will connect to 10022
-// normal : client -> tunnel client --------> tunnel server -> server
-// reverse: client -> tunnel server --------> tunnel client -> server
-func tunnelPorts() (int, int) {
-	if len(os.Args) > 1 {
-		if os.Args[1] == "reverse" {
-			return 0, 10022
-		}
+	if mode == tunnel.Reverse {
+		fowarder := pkg.NewFowarder(protocol, example.AppAddr)
+		client.SetOnHTTPTunnel(fowarder.ForwardHTTP)
 	}
-	return 10022, 0
+
+	go client.Start()
 }

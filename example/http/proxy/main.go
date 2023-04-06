@@ -4,6 +4,8 @@ import (
 	"os"
 
 	"github.com/kube-peering/internal/pkg"
+
+	example "github.com/kube-peering/example"
 )
 
 func main() {
@@ -15,16 +17,17 @@ func main() {
 }
 
 func tcp() {
-	interceptor := pkg.NewInterceptor("tcp", 10021)
-	forwarder := pkg.NewFowarder("tcp", ":8080")
+	interceptor := pkg.NewInterceptor("tcp", example.ProxyPort)
+	forwarder := pkg.NewFowarder("tcp", example.AppAddr)
 	interceptor.OnTCPConnected = forwarder.ForwardTCP
 
 	interceptor.Start()
 }
 
 func http() {
-	interceptor := pkg.NewInterceptor("http", 10021)
-	forwarder := pkg.NewFowarder("http", "http://localhost:8080")
+	interceptor := pkg.NewInterceptor("http", example.ProxyPort)
+	forwarder := pkg.NewFowarder("http", example.AppAddr)
 	interceptor.OnHTTPConnected = forwarder.ForwardHTTP
+
 	interceptor.Start()
 }

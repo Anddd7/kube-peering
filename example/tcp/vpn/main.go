@@ -9,6 +9,20 @@ import (
 	example "github.com/kube-peering/example"
 )
 
+var (
+	mode     tunnel.TunnelMode
+	protocol = "tcp"
+)
+
+func init() {
+	if len(os.Args) > 1 {
+		if os.Args[1] == "reverse" {
+			mode = tunnel.Reverse
+		}
+	}
+	mode = tunnel.Forward
+}
+
 func main() {
 	server()
 	client()
@@ -17,45 +31,35 @@ func main() {
 }
 
 func server() {
-	_, port := tunnelPorts()
-	tunnel := tunnel.NewTunnelServer(pkg.Forward, "tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
+	server := tunnel.NewTunnelServer(mode, protocol, example.TunnelPort, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
-	if port == 0 {
-		fowarder := pkg.NewFowarder("tcp", ":8080")
-		tunnel.SetOnTCPTunnel(fowarder.ForwardTCP)
-	} else {
-		interceptor := pkg.NewInterceptor("tcp", port)
-		interceptor.OnTCPConnected = tunnel.TunnelTCP
+	if mode == tunnel.Forward {
+		fowarder := pkg.NewFowarder(protocol, example.AppAddr)
+		server.SetOnTCPTunnel(fowarder.ForwardTCP)
+	}
+
+	if mode == tunnel.Reverse {
+		interceptor := pkg.NewInterceptor(protocol, example.VPNPort)
+		interceptor.OnTCPConnected = server.TunnelTCP
 		go interceptor.Start()
 	}
 
-	go tunnel.Start()
+	go server.Start()
 }
 
 func client() {
-	port, _ := tunnelPorts()
-	tunnel := tunnel.NewTunnelClient(pkg.Forward, "tcp", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
+	client := tunnel.NewTunnelClient(mode, protocol, example.TunnelAddr, example.TunnelCaCert, example.TunnelServerName)
 
-	if port == 0 {
-		fowarder := pkg.NewFowarder("tcp", ":8080")
-		tunnel.SetOnTCPTunnel(fowarder.ForwardTCP)
-	} else {
-		interceptor := pkg.NewInterceptor("tcp", port)
-		interceptor.OnTCPConnected = tunnel.TunnelTCP
+	if mode == tunnel.Forward {
+		interceptor := pkg.NewInterceptor(protocol, example.VPNPort)
+		interceptor.OnTCPConnected = client.TunnelTCP
 		go interceptor.Start()
 	}
 
-	go tunnel.Start()
-}
-
-// client will connect to 10022
-// normal : client -> tunnel client --------> tunnel server -> server
-// reverse: client -> tunnel server --------> tunnel client -> server
-func tunnelPorts() (int, int) {
-	if len(os.Args) > 1 {
-		if os.Args[1] == "reverse" {
-			return 0, 10022
-		}
+	if mode == tunnel.Reverse {
+		fowarder := pkg.NewFowarder(protocol, example.AppAddr)
+		client.SetOnTCPTunnel(fowarder.ForwardTCP)
 	}
-	return 10022, 0
+
+	go client.Start()
 }

@@ -5,10 +5,12 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+
+	example "github.com/kube-peering/example"
 )
 
 func main() {
-	listener, err := net.Listen("tcp", ":8080")
+	listener, err := net.Listen("tcp", example.AppAddr)
 	if err != nil {
 		panic(err)
 	}

@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	example "github.com/kube-peering/example"
 )
 
 func pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +37,5 @@ func pingHandlerFunc(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/ping", pingHandlerFunc)
-	fmt.Println("Server listening at :8080 ...")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(example.AppAddr, nil)
 }

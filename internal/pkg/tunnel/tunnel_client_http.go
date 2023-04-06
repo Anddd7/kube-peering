@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/kube-peering/internal/pkg"
 	"golang.org/x/net/http2"
 )
 
 func (t *TunnelClient) startHTTP() {
-	if t.mode == pkg.Forward {
+	if t.mode == Forward {
 		// http2 to multiplex multiple requests over a single connection
 		tr := &http2.Transport{
 			TLSClientConfig:    t.tlsConfig,
@@ -25,7 +24,7 @@ func (t *TunnelClient) startHTTP() {
 		t.httpClient = client
 	}
 
-	if t.mode == pkg.Reverse {
+	if t.mode == Reverse {
 		// reverse connection
 		conn, err := tls.Dial("tcp", t.remoteAddr, t.tlsConfig)
 		if err != nil {

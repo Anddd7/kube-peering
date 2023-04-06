@@ -11,12 +11,11 @@ import (
 	"time"
 
 	"github.com/felixge/tcpkeepalive"
-	"github.com/kube-peering/internal/pkg"
 	"golang.org/x/net/http2"
 )
 
 func (t *TunnelServer) startHTTP() {
-	if t.mode == pkg.Forward {
+	if t.mode == Forward {
 		server := http.Server{
 			Addr:      fmt.Sprintf(":%d", t.port),
 			TLSConfig: t.tlsConfig,
@@ -29,7 +28,7 @@ func (t *TunnelServer) startHTTP() {
 		}
 	}
 
-	if t.mode == pkg.Reverse {
+	if t.mode == Reverse {
 		tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
 		if err != nil {
 			t.logger.Panicln(err)
@@ -109,18 +108,4 @@ func (t *TunnelServer) SetOnHTTPTunnel(fn http.HandlerFunc) {
 
 		fn(w, req)
 	}
-}
-
-func pushTunnelHeaders(req *http.Request, host string) {
-	req.Header.Set("X-Forwarded-Host", host)
-}
-
-func popTunnelHeaders(req *http.Request) string {
-	host := req.Header.Get("X-Forwarded-Host")
-
-	defer func(r *http.Request) {
-		r.Header.Del("X-Forwarded-Host")
-	}(req)
-
-	return host
 }

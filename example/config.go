@@ -18,3 +18,17 @@ var (
 	TunnelServerTlsConfig, _ = config.LoadServerTlsConfig(TunnelServerCert, TunnelServerKey, TunnelServerName)
 	TunnelClientTlsConfig, _ = config.LoadClientTlsConfig(TunnelCaCert, TunnelServerName)
 )
+
+const (
+	AppPort = 8080
+	AppAddr = "localhost:8080"
+
+	TunnelPort = 10086
+	TunnelAddr = "localhost:10086"
+
+	ProxyPort = 10021
+	ProxyAddr = "localhost:10021"
+
+	VPNPort = 10022
+	VPNAddr = "localhost:10022"
+)

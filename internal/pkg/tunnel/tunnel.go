@@ -1,4 +1,4 @@
-package pkg
+package tunnel
 
 import (
 	"net/http"
@@ -34,4 +34,18 @@ func (t TunnelMode) String() string {
 	default:
 		return "unknown"
 	}
+}
+
+func pushTunnelHeaders(req *http.Request, host string) {
+	req.Header.Set("X-Forwarded-Host", host)
+}
+
+func popTunnelHeaders(req *http.Request) string {
+	host := req.Header.Get("X-Forwarded-Host")
+
+	defer func(r *http.Request) {
+		r.Header.Del("X-Forwarded-Host")
+	}(req)
+
+	return host
 }
