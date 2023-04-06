@@ -1,25 +1,42 @@
 package tunnel
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 	"net/url"
 
+	"github.com/kube-peering/internal/pkg"
 	"golang.org/x/net/http2"
 )
 
 func (t *TunnelClient) startHTTP() {
-	// http2 to multiplex multiple requests over a single connection
-	tr := &http2.Transport{
-		TLSClientConfig:    t.tlsConfig,
-		DisableCompression: true,
-		AllowHTTP:          false,
-	}
-	client := &http.Client{
-		Transport: tr,
+	if t.mode == pkg.Forward {
+		// http2 to multiplex multiple requests over a single connection
+		tr := &http2.Transport{
+			TLSClientConfig:    t.tlsConfig,
+			DisableCompression: true,
+			AllowHTTP:          false,
+		}
+		client := &http.Client{
+			Transport: tr,
+		}
+
+		t.httpClient = client
 	}
 
-	t.httpClient = client
+	if t.mode == pkg.Reverse {
+		// reverse connection
+		conn, err := tls.Dial("tcp", t.remoteAddr, t.tlsConfig)
+		if err != nil {
+			t.logger.Panicln(err)
+		}
+		h2s := &http2.Server{}
+		h2s.ServeConn(conn, &http2.ServeConnOpts{
+			Handler: t.onHTTPTunnel,
+		})
+		t.tlsConn = conn
+	}
 }
 
 func (t *TunnelClient) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
@@ -59,5 +76,14 @@ func (t *TunnelClient) tunnelRequest(r *http.Request) *http.Request {
 }
 
 func (t *TunnelClient) SetOnHTTPTunnel(fn http.HandlerFunc) {
-	// TODO
+	t.onHTTPTunnel = func(w http.ResponseWriter, r *http.Request) {
+		t.logger.Infof("on http tunnel %s => %s\n", r.RemoteAddr, r.URL.String())
+
+		req := r.Clone(t.ctx)
+
+		// pop the tunnel specific headers
+		_ = popTunnelHeaders(req)
+
+		fn(w, req)
+	}
 }

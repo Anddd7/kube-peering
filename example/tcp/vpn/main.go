@@ -18,7 +18,7 @@ func main() {
 
 func server() {
 	_, port := tunnelPorts()
-	tunnel := tunnel.NewTunnelServer("tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
+	tunnel := tunnel.NewTunnelServer(pkg.Forward, "tcp", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
 	if port == 0 {
 		fowarder := pkg.NewFowarder("tcp", ":8080")
@@ -34,7 +34,7 @@ func server() {
 
 func client() {
 	port, _ := tunnelPorts()
-	tunnel := tunnel.NewTunnelClient("tcp", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
+	tunnel := tunnel.NewTunnelClient(pkg.Forward, "tcp", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
 
 	if port == 0 {
 		fowarder := pkg.NewFowarder("tcp", ":8080")

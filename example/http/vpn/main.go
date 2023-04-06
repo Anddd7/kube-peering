@@ -17,34 +17,40 @@ func main() {
 
 func server() {
 	_, port := tunnelPorts()
-	tunnel := tunnel.NewTunnelServer("http", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 
+	var t pkg.Tunnel
 	if port == 0 {
+		// vpn tunnel
+		t = tunnel.NewTunnelServer(pkg.Forward, "http", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
 		fowarder := pkg.NewFowarder("http", "localhost:8080")
-		tunnel.SetOnHTTPTunnel(fowarder.ForwardHTTP)
+		t.SetOnHTTPTunnel(fowarder.ForwardHTTP)
 	} else {
-		// interceptor := pkg.NewInterceptor("tcp", port)
-		// interceptor.OnHTTPConnected = tunnel.TunnelHTTPOut
-		// go interceptor.Start()
+		// reverse tunnel
+		t = tunnel.NewTunnelServer(pkg.Reverse, "http", 10086, example.TunnelServerCert, example.TunnelServerKey, example.TunnelServerName)
+		interceptor := pkg.NewInterceptor("http", port)
+		interceptor.OnHTTPConnected = t.TunnelHTTP
+		go interceptor.Start()
 	}
-
-	go tunnel.Start()
+	go t.Start()
 }
 
 func client() {
 	port, _ := tunnelPorts()
-	tunnel := tunnel.NewTunnelClient("http", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
 
+	var t pkg.Tunnel
 	if port == 0 {
-		// fowarder := pkg.NewFowarder("tcp", ":8080")
-		// tunnel.SetOnHTTPTunnelIn(fowarder.ForwardHTTP)
+		// reverse tunnel
+		t = tunnel.NewTunnelClient(pkg.Reverse, "http", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
+		fowarder := pkg.NewFowarder("http", "localhost:8080")
+		t.SetOnHTTPTunnel(fowarder.ForwardHTTP)
 	} else {
+		// vpn tunnel
+		t = tunnel.NewTunnelClient(pkg.Forward, "http", "localhost:10086", example.TunnelCaCert, example.TunnelServerName)
 		interceptor := pkg.NewInterceptor("http", port)
-		interceptor.OnHTTPConnected = tunnel.TunnelHTTP
+		interceptor.OnHTTPConnected = t.TunnelHTTP
 		go interceptor.Start()
 	}
-
-	go tunnel.Start()
+	go t.Start()
 }
 
 // client will connect to 10022

@@ -20,16 +20,19 @@ type TunnelServer struct {
 	protocol     string
 	port         int
 	tlsConfig    *tls.Config
+	mode         pkg.TunnelMode
 	tlsConn      *tls.Conn
 	onTCPTunnel  func(conn util.PipeConn)
 	clientConn   *http2.ClientConn
 	onHTTPTunnel http.HandlerFunc
 }
 
-func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, serverName string) pkg.Tunnel {
+func NewTunnelServer(mode pkg.TunnelMode, protocol string, port int, serverCertPath, serverKeyPath, serverName string) pkg.Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
-		"mode", "server",
+		"type", "server",
+		"mode", mode.String(),
+		"protocol", protocol,
 	)
 	tlsConfig, err := config.LoadServerTlsConfig(serverCertPath, serverKeyPath, serverName)
 	if err != nil {
@@ -42,6 +45,7 @@ func NewTunnelServer(protocol string, port int, serverCertPath, serverKeyPath, s
 		protocol:  protocol,
 		port:      port,
 		tlsConfig: tlsConfig,
+		mode:      mode,
 	}
 }
 

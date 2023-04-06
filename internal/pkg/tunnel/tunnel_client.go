@@ -19,16 +19,19 @@ type TunnelClient struct {
 	protocol     string
 	remoteAddr   string
 	tlsConfig    *tls.Config
+	mode         pkg.TunnelMode
 	tlsConn      *tls.Conn
 	onTCPTunnel  func(conn util.PipeConn)
 	httpClient   *http.Client
 	onHTTPTunnel http.HandlerFunc
 }
 
-func NewTunnelClient(protocol, remoteAddr, caCertPath, serverName string) pkg.Tunnel {
+func NewTunnelClient(mode pkg.TunnelMode, protocol, remoteAddr, caCertPath, serverName string) pkg.Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
-		"mode", "client",
+		"type", "client",
+		"mode", mode.String(),
+		"protocol", protocol,
 	)
 	tlsConfig, err := config.LoadClientTlsConfig(caCertPath, serverName)
 	if err != nil {
@@ -41,6 +44,7 @@ func NewTunnelClient(protocol, remoteAddr, caCertPath, serverName string) pkg.Tu
 		protocol:   protocol,
 		remoteAddr: remoteAddr,
 		tlsConfig:  tlsConfig,
+		mode:       mode,
 	}
 }
 
