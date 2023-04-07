@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/kube-peering/internal/kpeering"
 	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/connectors"
@@ -22,9 +20,8 @@ var startCmd = &cobra.Command{
 		instance = &kpeering.Kpeering{
 			Logger: _logger,
 			VPNConfig: connectors.VPNConfig{
-				Protocol: pkg.Protocol(flags.protocol),
-				// LocalPort:  flags.port,
-				RemoteAddr: fmt.Sprintf("localhost:%d", flags.port),
+				Protocol:   pkg.Protocol(flags.protocol),
+				RemotePort: flags.port,
 				Tunnel: pkg.TunnelConfig{
 					Host:           "localhost",
 					Port:           flags.tunnelPort,

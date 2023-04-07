@@ -3,6 +3,7 @@ package tunnel
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/http"
 
 	"github.com/kube-peering/internal/pkg"
@@ -16,7 +17,8 @@ type tunnelClient struct {
 	ctx          context.Context
 	logger       *zap.SugaredLogger
 	protocol     pkg.Protocol
-	remoteAddr   string
+	serverHost   string
+	serverPort   int
 	tlsConfig    *tls.Config
 	mode         pkg.TunnelMode
 	tlsConn      *tls.Conn
@@ -25,7 +27,7 @@ type tunnelClient struct {
 	onHTTPTunnel http.HandlerFunc
 }
 
-func NewTunnelClient(mode pkg.TunnelMode, protocol pkg.Protocol, remoteAddr, caCertPath, serverName string) pkg.Tunnel {
+func NewTunnelClient(mode pkg.TunnelMode, protocol pkg.Protocol, serverHost string, serverPort int, caCertPath, serverName string) pkg.Tunnel {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "tunnel",
 		"type", "client",
@@ -41,10 +43,15 @@ func NewTunnelClient(mode pkg.TunnelMode, protocol pkg.Protocol, remoteAddr, caC
 		ctx:        context.TODO(),
 		logger:     _logger,
 		protocol:   protocol,
-		remoteAddr: remoteAddr,
+		serverHost: serverHost,
+		serverPort: serverPort,
 		tlsConfig:  tlsConfig,
 		mode:       mode,
 	}
+}
+
+func (t *tunnelClient) serverAddr() string {
+	return fmt.Sprintf("%s:%d", t.serverHost, t.serverPort)
 }
 
 func (t *tunnelClient) Start() {

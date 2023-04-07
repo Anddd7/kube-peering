@@ -2,7 +2,6 @@ package tunnel
 
 import (
 	"crypto/tls"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -18,7 +17,7 @@ import (
 func (t *tunnelServer) startHTTP() {
 	if t.mode == pkg.Forward {
 		server := http.Server{
-			Addr:      fmt.Sprintf(":%d", t.port),
+			Addr:      t.localAddr(),
 			TLSConfig: t.tlsConfig,
 		}
 
@@ -30,7 +29,7 @@ func (t *tunnelServer) startHTTP() {
 	}
 
 	if t.mode == pkg.Reverse {
-		tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
+		tcpAddr, err := net.ResolveTCPAddr("tcp", t.localAddr())
 		if err != nil {
 			t.logger.Panicln(err)
 		}

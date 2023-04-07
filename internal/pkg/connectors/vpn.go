@@ -1,8 +1,6 @@
 package connectors
 
 import (
-	"fmt"
-
 	"github.com/kube-peering/internal/pkg"
 	"github.com/kube-peering/internal/pkg/tunnel"
 )
@@ -11,7 +9,8 @@ type VPNConfig struct {
 	Tunnel     pkg.TunnelConfig
 	Protocol   pkg.Protocol
 	LocalPort  int
-	RemoteAddr string
+	RemoteHost string
+	RemotePort int
 }
 
 type VPNServer struct {
@@ -26,7 +25,7 @@ func NewVPNServer(cfg VPNConfig) *VPNServer {
 		cfg.Protocol, cfg.Tunnel.Port,
 		cfg.Tunnel.ServerCertPath, cfg.Tunnel.ServerKeyPath, cfg.Tunnel.ServerName,
 	)
-	forwarder := pkg.NewForwarder(cfg.Protocol, cfg.RemoteAddr)
+	forwarder := pkg.NewForwarder(cfg.Protocol, cfg.RemoteHost, cfg.RemotePort)
 
 	_tunnel.SetOnTCPTunnel(forwarder.ForwardTCP)
 	_tunnel.SetOnHTTPTunnel(forwarder.ForwardHTTP)
@@ -52,7 +51,7 @@ func NewVPNClient(cfg VPNConfig) *VPNClient {
 	interceptor := pkg.NewInterceptor(cfg.Protocol, cfg.LocalPort)
 	_tunnel := tunnel.NewTunnelClient(
 		pkg.Forward,
-		cfg.Protocol, fmt.Sprintf("%s:%d", cfg.Tunnel.Host, cfg.Tunnel.Port),
+		cfg.Protocol, cfg.Tunnel.Host, cfg.Tunnel.Port,
 		cfg.Tunnel.CaCertPath, cfg.Tunnel.ServerName,
 	)
 

@@ -12,8 +12,8 @@ import (
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "http" {
 		// not working, http interceptor cannot accept https request
-		connectors.NewProxy(pkg.HTTP, example.ProxyPort, example.AppHttpsAddr).Start()
+		connectors.NewProxy(pkg.HTTP, example.ProxyPort, "localhost", example.AppHttpsPort).Start()
 	} else {
-		connectors.NewProxy(pkg.TCP, example.ProxyPort, example.AppHttpsAddr).Start()
+		connectors.NewProxy(pkg.TCP, example.ProxyPort, "localhost", example.AppHttpsPort).Start()
 	}
 }

@@ -11,8 +11,8 @@ import (
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "http" {
-		connectors.NewProxy(pkg.HTTP, example.ProxyPort, example.AppAddr).Start()
+		connectors.NewProxy(pkg.HTTP, example.ProxyPort, "localhost", example.AppPort).Start()
 	} else {
-		connectors.NewProxy(pkg.TCP, example.ProxyPort, example.AppAddr).Start()
+		connectors.NewProxy(pkg.TCP, example.ProxyPort, "localhost", example.AppPort).Start()
 	}
 }

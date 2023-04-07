@@ -8,9 +8,9 @@ import (
 )
 
 func (t *tunnelClient) startTCP() {
-	conn, err := tls.Dial("tcp", t.remoteAddr, t.tlsConfig)
+	conn, err := tls.Dial("tcp", t.serverAddr(), t.tlsConfig)
 	if err != nil {
-		t.logger.Errorf("failed to connect to %s: %v", t.remoteAddr, err)
+		t.logger.Errorf("failed to connect to %s: %v", t.serverAddr(), err)
 		return
 	}
 

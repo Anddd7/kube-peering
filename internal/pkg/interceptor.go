@@ -48,8 +48,12 @@ func (t *Interceptor) Start() {
 	}
 }
 
+func (t *Interceptor) localAddr() string {
+	return fmt.Sprintf(":%d", t.port)
+}
+
 func (t *Interceptor) startTCP(onConnected func(conn PipeConn)) {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
+	tcpAddr, err := net.ResolveTCPAddr("tcp", t.localAddr())
 	if err != nil {
 		t.logger.Panicln(err)
 	}
@@ -72,5 +76,5 @@ func (t *Interceptor) startTCP(onConnected func(conn PipeConn)) {
 
 func (t *Interceptor) startHTTP(onConnected http.HandlerFunc) {
 	http2.ConfigureServer(&http.Server{}, &http2.Server{})
-	http.ListenAndServe(fmt.Sprintf(":%d", t.port), onConnected)
+	http.ListenAndServe(t.localAddr(), onConnected)
 }

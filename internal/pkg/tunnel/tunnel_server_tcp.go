@@ -9,8 +9,12 @@ import (
 	"github.com/kube-peering/internal/pkg"
 )
 
+func (t *tunnelServer) localAddr() string {
+	return fmt.Sprintf(":%d", t.port)
+}
+
 func (t *tunnelServer) startTCP() {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", t.port))
+	tcpAddr, err := net.ResolveTCPAddr("tcp", t.localAddr())
 	if err != nil {
 		t.logger.Panicln(err)
 	}

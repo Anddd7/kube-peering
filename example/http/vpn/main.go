@@ -13,7 +13,8 @@ var (
 	cfg  = connectors.VPNConfig{
 		Protocol:   pkg.HTTP,
 		LocalPort:  example.VPNPort,
-		RemoteAddr: example.AppAddr,
+		RemotePort: example.AppPort,
+		RemoteHost: "localhost",
 		Tunnel: pkg.TunnelConfig{
 			Port:           example.TunnelPort,
 			Host:           example.TunnelHost,

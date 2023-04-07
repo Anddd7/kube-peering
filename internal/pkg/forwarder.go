@@ -18,11 +18,12 @@ type Forwarder struct {
 	logger       *zap.SugaredLogger
 	mutex        sync.Mutex
 	protocol     Protocol
-	remoteAddr   string
+	targetHost   string
+	targetPort   int
 	reverseProxy *httputil.ReverseProxy
 }
 
-func NewForwarder(protocol Protocol, remoteAddr string) *Forwarder {
+func NewForwarder(protocol Protocol, targetHost string, targetPort int) *Forwarder {
 	_logger := logger.CreateLocalLogger().With(
 		"component", "forwarder",
 		"protocol", protocol,
@@ -32,12 +33,17 @@ func NewForwarder(protocol Protocol, remoteAddr string) *Forwarder {
 		ctx:        context.TODO(),
 		logger:     _logger,
 		protocol:   protocol,
-		remoteAddr: remoteAddr,
+		targetHost: targetHost,
+		targetPort: targetPort,
 	}
 }
 
+func (t *Forwarder) remoteAddr() string {
+	return fmt.Sprintf("%s:%d", t.targetHost, t.targetPort)
+}
+
 func (t *Forwarder) ForwardTCP(from PipeConn) {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", t.remoteAddr)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", t.remoteAddr())
 	if err != nil {
 		t.logger.Panicln(err)
 	}
@@ -54,11 +60,11 @@ func (t *Forwarder) initReverseProxy() {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	remoteUrl, err := url.Parse(fmt.Sprintf("%s://%s", t.protocol, t.remoteAddr))
+	targetUrl, err := url.Parse(fmt.Sprintf("%s://%s", t.protocol, t.remoteAddr()))
 	if err != nil {
 		t.logger.Panicln(err)
 	}
-	t.reverseProxy = httputil.NewSingleHostReverseProxy(remoteUrl)
+	t.reverseProxy = httputil.NewSingleHostReverseProxy(targetUrl)
 	t.reverseProxy.ModifyResponse = func(resp *http.Response) error {
 		resp.Header.Set("X-Proxy-Server", "kube-peering")
 		return nil

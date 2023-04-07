@@ -8,9 +8,9 @@ type Proxy struct {
 	Forwarder   *pkg.Forwarder
 }
 
-func NewProxy(protocol pkg.Protocol, localPort int, remoteAddr string) *Proxy {
+func NewProxy(protocol pkg.Protocol, localPort int, remoteHost string, remotePort int) *Proxy {
 	interceptor := pkg.NewInterceptor(protocol, localPort)
-	forwarder := pkg.NewForwarder(protocol, remoteAddr)
+	forwarder := pkg.NewForwarder(protocol, remoteHost, remotePort)
 
 	interceptor.OnTCPConnected = forwarder.ForwardTCP
 	interceptor.OnHTTPConnected = forwarder.ForwardHTTP

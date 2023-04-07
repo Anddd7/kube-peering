@@ -25,7 +25,6 @@ var (
 				VPNConfig: connectors.VPNConfig{
 					Protocol:  pkg.Protocol(flags.protocol),
 					LocalPort: flags.localPort,
-					// RemoteAddr: fmt.Sprintf("localhost:%d", flags.remotePort),
 					Tunnel: pkg.TunnelConfig{
 						Host:       tunnelAddr.IP.String(),
 						Port:       tunnelAddr.Port,

@@ -27,7 +27,7 @@ func (t *tunnelClient) startHTTP() {
 
 	if t.mode == pkg.Reverse {
 		// reverse connection
-		conn, err := tls.Dial("tcp", t.remoteAddr, t.tlsConfig)
+		conn, err := tls.Dial("tcp", t.serverAddr(), t.tlsConfig)
 		if err != nil {
 			t.logger.Panicln(err)
 		}
@@ -43,7 +43,7 @@ func (t *tunnelClient) TunnelHTTP(w http.ResponseWriter, r *http.Request) {
 	req := t.tunnelRequest(r)
 	t.logger.Infof("tunnel request from [%s]%s to [%s]%s",
 		r.RemoteAddr, r.URL.Path,
-		t.remoteAddr, req.URL.Path,
+		t.serverAddr(), req.URL.Path,
 	)
 
 	resp, err := t.httpClient.Do(req)
@@ -65,7 +65,7 @@ func (t *tunnelClient) tunnelRequest(r *http.Request) *http.Request {
 	req.RequestURI = ""
 	req.URL = &url.URL{
 		Scheme: "https",
-		Host:   t.remoteAddr,
+		Host:   t.serverAddr(),
 		Path:   r.URL.String(),
 	}
 

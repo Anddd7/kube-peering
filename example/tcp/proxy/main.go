@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	connectors.NewProxy(pkg.TCP, example.ProxyPort, example.AppAddr).Start()
+	connectors.NewProxy(pkg.TCP, example.ProxyPort, "localhost", example.AppPort).Start()
 }
