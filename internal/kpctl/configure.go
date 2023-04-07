@@ -45,5 +45,5 @@ func ReadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return &config, nil
 }

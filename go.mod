@@ -7,7 +7,6 @@ require go.uber.org/zap v1.24.0
 require golang.org/x/text v0.8.0 // indirect
 
 require (
-	github.com/BurntSushi/toml v1.2.1
 	github.com/felixge/tcpkeepalive v0.0.0-20220224101934-f56176a53a1b
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/pelletier/go-toml v1.9.5

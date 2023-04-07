@@ -43,7 +43,7 @@ type ReverseVPNClient struct {
 
 func NewReverseVPNClient(cfg VPNConfig) *ReverseVPNClient {
 	_tunnel := tunnel.NewTunnelClient(
-		pkg.Forward,
+		pkg.Reverse,
 		cfg.Protocol, cfg.Tunnel.Host, cfg.Tunnel.Port,
 		cfg.Tunnel.CaCertPath, cfg.Tunnel.ServerName,
 	)

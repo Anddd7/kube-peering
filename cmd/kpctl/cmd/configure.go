@@ -20,7 +20,7 @@ var (
 				"cmd", "kpctl configure",
 			)
 			if kpctl.IsConfigExists(config.ConfigFile) {
-				_logger.Infof("config file %s exists.")
+				_logger.Infof("config file %s exists.", config.ConfigFile)
 				return
 			}
 

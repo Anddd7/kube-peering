@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"github.com/kube-peering/internal/kpctl"
 	"github.com/kube-peering/internal/kpeering"
-	"github.com/kube-peering/internal/pkg"
-	"github.com/kube-peering/internal/pkg/connectors"
+	"github.com/kube-peering/internal/pkg/config"
 	"github.com/kube-peering/internal/pkg/logger"
 	"github.com/spf13/cobra"
 )
@@ -16,20 +16,15 @@ var startCmd = &cobra.Command{
 		_logger := logger.CreateLocalLogger().With(
 			"cmd", "kpeering start",
 		)
+		cfg, err := kpctl.ReadConfig(config.ConfigFile)
+		if err != nil {
+			_logger.Errorf("read config file failed: %s", err)
+			return
+		}
 
 		instance = &kpeering.Kpeering{
-			Logger: _logger,
-			VPNConfig: connectors.VPNConfig{
-				Protocol:   pkg.Protocol(flags.protocol),
-				RemotePort: flags.port,
-				Tunnel: pkg.TunnelConfig{
-					Host:           "localhost",
-					Port:           flags.tunnelPort,
-					ServerCertPath: flags.tunnelServerCert,
-					ServerKeyPath:  flags.tunnelServerKey,
-					ServerName:     flags.tunnelServerName,
-				},
-			},
+			Logger:    _logger,
+			VPNConfig: cfg.VPNConfig,
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -37,21 +32,6 @@ var startCmd = &cobra.Command{
 	},
 }
 
-var flags = struct {
-	protocol         string
-	tunnelPort       int
-	tunnelServerCert string
-	tunnelServerKey  string
-	tunnelServerName string
-	port             int
-}{}
-
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().StringVar(&flags.protocol, "protocol", "tcp", "the protocol of peer connection")
-	startCmd.Flags().IntVar(&flags.tunnelPort, "tunnel-port", 10022, "the tunnel server port")
-	startCmd.Flags().StringVar(&flags.tunnelServerCert, "tunnel-server-cert", "../../bin/server.crt", "the server cert of tunnel server")
-	startCmd.Flags().StringVar(&flags.tunnelServerKey, "tunnel-server-key", "../../bin/server.key", "the server key of tunnel server")
-	startCmd.Flags().StringVar(&flags.tunnelServerName, "tunnel-server-name", "localhost", "the tunnel server nam in cert")
-	startCmd.Flags().IntVarP(&flags.port, "port", "p", 8080, "the port of application running remotely")
 }
