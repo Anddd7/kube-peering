@@ -37,8 +37,8 @@ func (t TunnelMode) String() string {
 type TunnelConfig struct {
 	Port           int
 	Host           string
-	ServerCertPath string
-	ServerKeyPath  string
-	CaCertPath     string
-	ServerName     string
+	ServerCertPath string `toml:"server_cert_path"`
+	ServerKeyPath  string `toml:"server_key_path"`
+	CaCertPath     string `toml:"ca_cert_path"`
+	ServerName     string `toml:"server_name"`
 }

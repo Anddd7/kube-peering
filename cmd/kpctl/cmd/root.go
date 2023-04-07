@@ -25,4 +25,5 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolVar(&config.DebugMode, "debug", config.DebugMode, "Enable debug logs")
 	rootCmd.Flags().StringVar(&config.LogEncoder, "log-encoder", config.LogEncoder, "Log format, json or plain")
+	rootCmd.Flags().StringVar(&config.ConfigFile, "config", config.ConfigFile, "The config file path")
 }

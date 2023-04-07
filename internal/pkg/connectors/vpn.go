@@ -8,9 +8,9 @@ import (
 type VPNConfig struct {
 	Tunnel     pkg.TunnelConfig
 	Protocol   pkg.Protocol
-	LocalPort  int
-	RemoteHost string
-	RemotePort int
+	LocalPort  int    `toml:"local_port"`
+	RemoteHost string `toml:"remote_host,omitempty"`
+	RemotePort int    `toml:"remote_port"`
 }
 
 type VPNServer struct {
