@@ -24,3 +24,10 @@ uninstall:
 
 build_linux:
 	GOOS=linux GOARCH=amd64 go build -o $(BUILD_BINARY) ./
+
+docker_build:
+	docker build -t $(COMMAND) \
+		--build-arg COMMAND=$(COMMAND) \
+		--build-arg VERSION=$(VERSION) \
+		-f Dockerfile \
+		../..
