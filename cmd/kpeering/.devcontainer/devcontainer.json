@@ -1,0 +1,21 @@
+{
+    "name": "devcontainers_server",
+    "image": "mcr.microsoft.com/devcontainers/go:0-1.20",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+    },
+    "postCreateCommand": "go version",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.go",
+                "Anjali.clipboard-history",
+            ]
+        }
+    },
+    "remoteUser": "root",
+    "runArgs": [
+        "--network=bridge"
+    ]
+}

@@ -76,5 +76,8 @@ func (t *Interceptor) startTCP(onConnected func(conn PipeConn)) {
 
 func (t *Interceptor) startHTTP(onConnected http.HandlerFunc) {
 	http2.ConfigureServer(&http.Server{}, &http2.Server{})
+
+	t.logger.Infof("Listening on %s", t.localAddr())
+
 	http.ListenAndServe(t.localAddr(), onConnected)
 }

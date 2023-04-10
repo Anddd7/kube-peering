@@ -57,7 +57,7 @@ func (t *tunnelServer) startHTTP() {
 			log.Fatal(err)
 		}
 
-		t.logger.Infof("tunnel is connected to %s", t.tlsConn.RemoteAddr().String())
+		t.logger.Infof("tunnel is connected to %v", tlsServerConn.RemoteAddr().String())
 
 		t.tlsConn = tlsServerConn
 		t.clientConn = h2Conn
