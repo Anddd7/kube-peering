@@ -9,7 +9,7 @@ import (
 var (
 	DebugMode  bool   = false
 	LogEncoder string = "plain"
-	ConfigFile string = "./.kpctl/config.toml"
+	ConfigFile string = ".kpeering/config.toml"
 
 	DefautlTunnelPort = 10022
 )

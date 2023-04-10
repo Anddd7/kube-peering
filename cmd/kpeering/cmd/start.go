@@ -22,6 +22,8 @@ var startCmd = &cobra.Command{
 			return
 		}
 
+		_logger.Debugf("kpeering is starting, with config: %v", cfg.VPNConfig)
+
 		instance = &kpeering.Kpeering{
 			Logger:    _logger,
 			VPNConfig: cfg.VPNConfig,

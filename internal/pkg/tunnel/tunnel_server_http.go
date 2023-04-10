@@ -23,6 +23,8 @@ func (t *tunnelServer) startHTTP() {
 
 		http.HandleFunc("/", t.onHTTPTunnel)
 
+		t.logger.Infof("tunnel is listening on %s", t.localAddr())
+
 		if err := server.ListenAndServeTLS("", ""); err != nil {
 			log.Fatal(err)
 		}
@@ -40,6 +42,8 @@ func (t *tunnelServer) startHTTP() {
 		}
 		defer listener.Close()
 
+		t.logger.Infof("tunnel is listening on %s", t.localAddr())
+
 		conn, err := listener.AcceptTCP()
 		if err != nil {
 			t.logger.Panicln(err)
@@ -52,6 +56,8 @@ func (t *tunnelServer) startHTTP() {
 			// tls verification failed
 			log.Fatal(err)
 		}
+
+		t.logger.Infof("tunnel is connected to %s", t.tlsConn.RemoteAddr().String())
 
 		t.tlsConn = tlsServerConn
 		t.clientConn = h2Conn
